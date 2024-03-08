@@ -4,6 +4,9 @@ local QuestieCombatQueue = QuestieLoader:CreateModule("QuestieCombatQueue")
 ---@type QuestieLib
 local QuestieLib = QuestieLoader:CreateModule("QuestieLib")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local tpack =  QuestieLib.tpack
 local tunpack = QuestieLib.tunpack
 

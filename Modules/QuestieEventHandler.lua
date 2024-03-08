@@ -46,6 +46,9 @@ local QuestieDebugOffer = QuestieLoader:ImportModule("QuestieDebugOffer")
 ---@type AvailableQuests
 local AvailableQuests = QuestieLoader:ImportModule("AvailableQuests")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local questAcceptedMessage = string.gsub(ERR_QUEST_ACCEPTED_S, "(%%s)", "(.+)")
 local questCompletedMessage = string.gsub(ERR_QUEST_COMPLETE_S, "(%%s)", "(.+)")
 

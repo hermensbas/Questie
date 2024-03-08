@@ -31,6 +31,9 @@ local QuestieTracker = QuestieLoader:ImportModule("QuestieTracker")
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local tableRemove = table.remove
 
 local QUEST_LOG_STATES = {

@@ -28,6 +28,9 @@ local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local LibDropDown = LibStub:GetLibrary("LibUIDropDownMenuQuestie-4.0")
 
 TrackerMenu.menuFrame = LibDropDown:Create_UIDropDownMenu("QuestieTrackerMenuFrame", UIParent)

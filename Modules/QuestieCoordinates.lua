@@ -4,6 +4,9 @@ local QuestieCoords = QuestieLoader:CreateModule("QuestieCoords");
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local posX = 0;
 local posY = 0;
 

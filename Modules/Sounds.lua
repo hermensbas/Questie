@@ -1,6 +1,9 @@
 ---@class Sounds
 local Sounds = QuestieLoader:CreateModule("Sounds")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local soundTable
 local shouldPlayObjectiveSound = false
 local shouldPlayObjectiveProgress = false

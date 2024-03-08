@@ -82,6 +82,7 @@ local SeasonOfDiscovery = QuestieLoader:ImportModule("SeasonOfDiscovery")
 
 --- COMPATIBILITY ---
 local WOW_PROJECT_ID = QuestieCompat.WOW_PROJECT_ID
+local C_Timer = QuestieCompat.C_Timer
 
 local coYield = coroutine.yield
 

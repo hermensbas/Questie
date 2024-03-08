@@ -1,6 +1,9 @@
 ---@class ThreadLib
 local ThreadLib = QuestieLoader:CreateModule("ThreadLib")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 --Coroutine functions
 local coStatus, coResume, coCreate = coroutine.status, coroutine.resume, coroutine.create
 local lType = type

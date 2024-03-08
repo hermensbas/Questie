@@ -23,6 +23,9 @@ local l10n = QuestieLoader:ImportModule("l10n")
 ---@type WeaponMasterSkills
 local WeaponMasterSkills = QuestieLoader:ImportModule("WeaponMasterSkills")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 QuestieMap.ICON_MAP_TYPE = "MAP";
 QuestieMap.ICON_MINIMAP_TYPE = "MINIMAP";
 

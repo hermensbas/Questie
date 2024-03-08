@@ -31,6 +31,9 @@ local QuestieLib = QuestieLoader:ImportModule("QuestieLib");
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local LibDropDown = LibStub:GetLibrary("LibUIDropDownMenuQuestie-4.0")
 local LSM30 = LibStub("LibSharedMedia-3.0")
 

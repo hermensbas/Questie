@@ -5,6 +5,8 @@ local MessageHandlerFactory = setmetatable(QuestieLoader:CreateModule("MessageHa
 ---@alias Event string
 ---@alias Callback fun(...:any):any
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
 
 --- Localize functions
 local yield = coroutine.yield

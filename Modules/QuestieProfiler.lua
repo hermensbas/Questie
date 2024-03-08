@@ -1,5 +1,8 @@
 local QuestieProfiler = QuestieLoader:CreateModule("Profiler")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 QuestieProfiler.hooks = {}
 QuestieProfiler.alreadyHooked = {}
 QuestieProfiler.needsHook = {}

@@ -1,6 +1,7 @@
 local addonName, _ = ...
 
 --- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
 local WOW_PROJECT_CLASSIC = QuestieCompat.WOW_PROJECT_CLASSIC
 local WOW_PROJECT_BURNING_CRUSADE_CLASSIC = QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC
 local WOW_PROJECT_WRATH_CLASSIC = QuestieCompat.WOW_PROJECT_WRATH_CLASSIC
@@ -14,6 +15,7 @@ if addonName ~= QuestieCompat.addonName then
         button2 = "OK",
         hasEditBox = false,
         whileDead = true,
+        timeout = 0 -- 335
     }
 
     C_Timer.After(4, function()

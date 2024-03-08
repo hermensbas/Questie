@@ -8,6 +8,9 @@ local QuestieTracker = QuestieLoader:ImportModule("QuestieTracker")
 ---@type TrackerLinePool
 local TrackerLinePool = QuestieLoader:ImportModule("TrackerLinePool")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local fadeTicker
 local fadeTickerDirection
 local fadeTickerValue = 0

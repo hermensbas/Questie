@@ -21,6 +21,9 @@ local l10n = QuestieLoader:ImportModule("l10n")
 ---@type QuestLogCache
 local QuestLogCache = QuestieLoader:ImportModule("QuestLogCache")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local HBD = LibStub("HereBeDragonsQuestie-2.0")
 
 -- Addon message prefix

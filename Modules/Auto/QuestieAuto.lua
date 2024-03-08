@@ -5,6 +5,9 @@ local _QuestieAuto = QuestieAuto.private
 ---@type QuestieDB
 local QuestieDB = QuestieLoader:ImportModule("QuestieDB");
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local shouldRunAuto = true
 local doneTalking = false
 

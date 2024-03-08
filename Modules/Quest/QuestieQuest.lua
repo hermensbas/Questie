@@ -46,6 +46,9 @@ local ThreadLib = QuestieLoader:ImportModule("ThreadLib")
 ---@type AvailableQuests
 local AvailableQuests = QuestieLoader:ImportModule("AvailableQuests")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 --We should really try and squeeze out all the performance we can, especially in this.
 local tostring = tostring;
 local tinsert = table.insert;

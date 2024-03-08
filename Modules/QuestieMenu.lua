@@ -26,6 +26,9 @@ local QuestieCombatQueue = QuestieLoader:ImportModule("QuestieCombatQueue")
 ---@type AvailableQuests
 local AvailableQuests = QuestieLoader:ImportModule("AvailableQuests")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local LibDropDown = LibStub:GetLibrary("LibUIDropDownMenuQuestie-4.0")
 
 local _, playerClass = UnitClass("player")

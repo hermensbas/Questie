@@ -17,6 +17,9 @@ local TrackerQuestTimers = QuestieLoader:ImportModule("TrackerQuestTimers")
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 QuestieOptions.tabs.tracker = { ... }
 
 local _GetShortcuts

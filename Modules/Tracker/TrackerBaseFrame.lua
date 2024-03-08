@@ -15,6 +15,9 @@ local QuestieCombatQueue = QuestieLoader:ImportModule("QuestieCombatQueue")
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local WatchFrame = QuestWatchFrame or WatchFrame
 local baseFrame, sizer, sizerSetPoint, sizerSetPointY, sizerLine1, sizerLine2, sizerLine3
 local updateTimer

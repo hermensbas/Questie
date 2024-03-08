@@ -42,6 +42,9 @@ local l10n = QuestieLoader:ImportModule("l10n")
 ---@type QuestieDebugOffer
 local QuestieDebugOffer = QuestieLoader:ImportModule("QuestieDebugOffer")
 
+--- COMPATIBILITY ---
+local C_Timer = QuestieCompat.C_Timer
+
 local LSM30 = LibStub("LibSharedMedia-3.0")
 
 -- Local Vars
