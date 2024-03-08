@@ -1,6 +1,11 @@
 ---@diagnostic disable: undefined-global, return-type-mismatch, undefined-field
 ---@class QuestieCompat
-QuestieCompat = {}
+QuestieCompat = setmetatable({}, {__index = _G})
+
+-- addon/folder name
+QuestieCompat.addonName = "Questie"
+-- addon is running on 3.3.5 WotLK client
+QuestieCompat.Is335 = (select(4, GetBuildInfo()) == 30300)
 
 local errorMsg = "Questie tried to call a blizzard API function that does not exist..."
 

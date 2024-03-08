@@ -10,6 +10,8 @@ local QuestieLib = QuestieLoader:ImportModule("QuestieLib")
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local WOW_PROJECT_ID = QuestieCompat.WOW_PROJECT_ID
 
 local type = type
 local abs, min, floor = math.abs, math.min, math.floor

@@ -30,7 +30,7 @@ function _MinimapIcon:CreateDataBrokerObject()
     local LDBDataObject = LibStub("LibDataBroker-1.1"):NewDataObject("Questie", {
         type = "data source",
         text = Questie.db.profile.ldbDisplayText,
-        icon = "Interface\\Addons\\Questie\\Icons\\complete.blp",
+        icon = QuestieLib.AddonPath.."Icons\\complete.blp",
 
         OnClick = function (_, button)
             if (not Questie.started) then

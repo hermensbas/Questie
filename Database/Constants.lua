@@ -1,6 +1,10 @@
 ---@type QuestieDB
 local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
 
+--- COMPATIBILITY ---
+local WOW_PROJECT_ID = QuestieCompat.WOW_PROJECT_ID
+local WOW_PROJECT_WRATH_CLASSIC = QuestieCompat.WOW_PROJECT_WRATH_CLASSIC
+
 QuestieDB.sortKeys = {
     SEASONAL = -22,
     HERBALISM = -24,

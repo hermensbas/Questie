@@ -53,6 +53,8 @@ local QUEST_FLAGS_WEEKLY = 32768
 local QUEST_FLAGS_DAILY_X2 = 2 * QUEST_FLAGS_DAILY
 local QUEST_FLAGS_WEEKLY_X2 = 2 * QUEST_FLAGS_WEEKLY
 --- COMPATIBILITY ---
+local WOW_PROJECT_ID = QuestieCompat.WOW_PROJECT_ID
+local WOW_PROJECT_CLASSIC = QuestieCompat.WOW_PROJECT_CLASSIC
 local IsQuestFlaggedCompleted = IsQuestFlaggedCompleted or C_QuestLog.IsQuestFlaggedCompleted
 
 --- Tag corrections for quests for which the API returns the wrong values.

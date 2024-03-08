@@ -4,6 +4,8 @@ local Tutorial = QuestieLoader:ImportModule("Tutorial")
 local l10n = QuestieLoader:ImportModule("l10n")
 ---@type AvailableQuests
 local AvailableQuests = QuestieLoader:ImportModule("AvailableQuests")
+---@type QuestieLib
+local QuestieLib = QuestieLoader:ImportModule("QuestieLib");
 
 ---@return Frame
 function Tutorial.ShowRunes()
@@ -39,7 +41,7 @@ function Tutorial.ShowRunes()
     customText:SetPoint("TOP", 0, -35)
 
     local showRunesIcon = baseFrame:CreateTexture(nil, "OVERLAY")
-    showRunesIcon:SetTexture("Interface\\Addons\\Questie\\Icons\\sod_rune.blp")
+    showRunesIcon:SetTexture(QuestieLib.AddonPath.."Icons\\sod_rune.blp")
     showRunesIcon:SetSize(30, 30)
     showRunesIcon:SetPoint("TOP", 0, -85)
 

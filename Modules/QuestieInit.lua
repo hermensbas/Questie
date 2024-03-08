@@ -80,6 +80,9 @@ local AvailableQuests = QuestieLoader:ImportModule("AvailableQuests")
 ---@type SeasonOfDiscovery
 local SeasonOfDiscovery = QuestieLoader:ImportModule("SeasonOfDiscovery")
 
+--- COMPATIBILITY ---
+local WOW_PROJECT_ID = QuestieCompat.WOW_PROJECT_ID
+
 local coYield = coroutine.yield
 
 local function loadFullDatabase()

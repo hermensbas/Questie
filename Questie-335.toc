@@ -14,12 +14,12 @@
 ## X-Curse-Project-ID: 334372
 ## X-Wago-ID: qv634BKb
 
-#Modules\QuestieCompat.lua
+Modules\QuestieCompat.lua
 #Modules\WorldMapTaintWorkaround.lua
 
 Compat\embeds.xml
 
-#Modules\VersionCheck.lua
+Modules\VersionCheck.lua
 
 # Loader module
 #Modules\Libs\QuestieLoader.lua

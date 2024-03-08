@@ -10,7 +10,7 @@ local QuestiePlayer = QuestieLoader:ImportModule("QuestiePlayer")
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
-QuestieLib.AddonPath = "Interface\\Addons\\Questie\\"
+QuestieLib.AddonPath = "Interface\\Addons\\"..QuestieCompat.addonName.."\\"
 
 local math_abs = math.abs
 local math_sqrt = math.sqrt
@@ -404,7 +404,7 @@ local cachedVersion
 ---@return number, number, number
 function QuestieLib:GetAddonVersionInfo()
     if (not cachedVersion) then
-        cachedVersion = GetAddOnMetadata("Questie", "Version")
+        cachedVersion = GetAddOnMetadata(QuestieCompat.addonName, "Version")
     end
 
     local major, minor, patch = string.match(cachedVersion, "(%d+)%p(%d+)%p(%d+)")
@@ -415,7 +415,7 @@ end
 function QuestieLib:GetAddonVersionString()
     if (not cachedVersion) then
         -- This brings up the ## Version from the TOC
-        cachedVersion = GetAddOnMetadata("Questie", "Version")
+        cachedVersion = GetAddOnMetadata(QuestieCompat.addonName, "Version")
     end
 
     return "v" .. cachedVersion

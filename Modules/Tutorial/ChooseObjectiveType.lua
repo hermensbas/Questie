@@ -4,6 +4,8 @@ local Tutorial = QuestieLoader:ImportModule("Tutorial")
 local l10n = QuestieLoader:ImportModule("l10n")
 ---@type QuestieOptionsUtils
 local QuestieOptionsUtils = QuestieLoader:ImportModule("QuestieOptionsUtils")
+---@type QuestieLib
+local QuestieLib = QuestieLoader:ImportModule("QuestieLib");
 
 ---@return Frame
 function Tutorial.CreateChooseObjectiveTypeFrame()
@@ -36,17 +38,17 @@ function Tutorial.CreateChooseObjectiveTypeFrame()
     customText:SetPoint("TOP", 0, -35)
 
     local onlyQuestieImage = baseFrame:CreateTexture(nil, "OVERLAY")
-    onlyQuestieImage:SetTexture("Interface\\Addons\\Questie\\Modules\\Tutorial\\onlyQuestie.blp")
+    onlyQuestieImage:SetTexture(QuestieLib.AddonPath.."Modules\\Tutorial\\onlyQuestie.blp")
     onlyQuestieImage:SetSize(220, 220)
     onlyQuestieImage:SetPoint("TOPLEFT", 20, -90)
 
     local pdfQuestImage = baseFrame:CreateTexture(nil, "OVERLAY")
-    pdfQuestImage:SetTexture("Interface\\Addons\\Questie\\Modules\\Tutorial\\pfQuest.blp")
+    pdfQuestImage:SetTexture(QuestieLib.AddonPath.."Modules\\Tutorial\\pfQuest.blp")
     pdfQuestImage:SetSize(220, 220)
     pdfQuestImage:SetPoint("TOP", 0, -90)
 
     local onlyBlizzardImage = baseFrame:CreateTexture(nil, "OVERLAY")
-    onlyBlizzardImage:SetTexture("Interface\\Addons\\Questie\\Modules\\Tutorial\\onlyBlizzard.blp")
+    onlyBlizzardImage:SetTexture(QuestieLib.AddonPath.."Modules\\Tutorial\\onlyBlizzard.blp")
     onlyBlizzardImage:SetSize(220, 220)
     onlyBlizzardImage:SetPoint("TOPRIGHT", -20, -90)
 

@@ -26,7 +26,8 @@ local QuestieMap = QuestieLoader:ImportModule("QuestieMap")
 local QuestieCombatQueue = QuestieLoader:ImportModule("QuestieCombatQueue")
 ---@type QuestieDB
 local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
-
+---@type QuestieLib
+local QuestieLib = QuestieLoader:ImportModule("QuestieLib");
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
@@ -188,7 +189,7 @@ function TrackerLinePool.Initialize(questFrame)
                 self.mode = criteria
 
                 if criteria == true then
-                    self.texture:SetTexture("Interface\\Addons\\Questie\\Icons\\Checkmark")
+                    self.texture:SetTexture(QuestieLib.AddonPath.."Icons\\Checkmark")
                     ---------------------------------------------------------------------
                     -- Just in case we decide to show the minus sign for incompletes
                     ---------------------------------------------------------------------
@@ -320,7 +321,7 @@ function TrackerLinePool.Initialize(questFrame)
         playButton:SetHitRectInsets(2, 2, 2, 2)
         playButton:SetPoint("RIGHT", line.label, "LEFT", -4, 0)
         playButton:SetFrameLevel(0)
-        playButton:SetNormalTexture("Interface\\Addons\\Questie\\Icons\\QuestLogPlayButton")
+        playButton:SetNormalTexture(QuestieLib.AddonPath.."Icons\\QuestLogPlayButton")
         playButton:SetHighlightTexture("Interface\\BUTTONS\\UI-Panel-MinimizeButton-Highlight")
 
         playButton.SetPlayButton = function(self, questId)
@@ -373,7 +374,7 @@ function TrackerLinePool.Initialize(questFrame)
                         end
 
                         isPlaying = button.soundData and VoiceOver.SoundQueue:Contains(button.soundData)
-                        local texturePath = isPlaying and "Interface\\Addons\\Questie\\Icons\\QuestLogStopButton" or "Interface\\Addons\\Questie\\Icons\\QuestLogPlayButton"
+                        local texturePath = isPlaying and QuestieLib.AddonPath.."Icons\\QuestLogStopButton" or QuestieLib.AddonPath.."Icons\\QuestLogPlayButton"
                         self:SetNormalTexture(texturePath)
 
                         -- Move the VoiceOverFrame below the DurabilityFrame if it's present and not already moved
@@ -923,7 +924,7 @@ function TrackerLinePool.SetAllPlayButtonAlpha(alpha)
 
             if button then
                 local isPlaying = button.soundData and VoiceOver.SoundQueue:Contains(button.soundData)
-                local texturePath = isPlaying and "Interface\\Addons\\Questie\\Icons\\QuestLogStopButton" or "Interface\\Addons\\Questie\\Icons\\QuestLogPlayButton"
+                local texturePath = isPlaying and QuestieLib.AddonPath.."Icons\\QuestLogStopButton" or QuestieLib.AddonPath.."Icons\\QuestLogPlayButton"
 
                 line.playButton:SetNormalTexture(texturePath)
             end
