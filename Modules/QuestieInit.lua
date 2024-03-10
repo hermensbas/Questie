@@ -96,9 +96,9 @@ local function loadFullDatabase()
     coYield()
     QuestieCorrections:Initialize()
 
-    print("\124cFF4DDBFF [3/9] " .. l10n("Initializing townfolks") .. "...")
-    coYield()
-    QuestieMenu:PopulateTownsfolk()
+    --print("\124cFF4DDBFF [3/9] " .. l10n("Initializing townfolks") .. "...")
+    --coYield()
+    --QuestieMenu:PopulateTownsfolk()
 
     print("\124cFF4DDBFF [4/9] " .. l10n("Initializing locale") .. "...")
     coYield()
@@ -150,7 +150,7 @@ QuestieInit.Stages[1] = function() -- run as a coroutine
 
     MinimapIcon:Init()
 
-    HBDHooks:Init()
+    --HBDHooks:Init()
 
     Questie:SetIcons()
 
@@ -213,11 +213,11 @@ QuestieInit.Stages[1] = function() -- run as a coroutine
 
     local dbCompiledCount = Questie.IsSoD and Questie.db.global.sod.dbCompiledCount or Questie.db.global.dbCompiledCount
 
-    if (not Questie.db.char.townsfolk) or (dbCompiledCount ~= Questie.db.char.townsfolkVersion) or (Questie.db.char.townsfolkClass ~= UnitClass("player")) then
+    --[[if (not Questie.db.char.townsfolk) or (dbCompiledCount ~= Questie.db.char.townsfolkVersion) or (Questie.db.char.townsfolkClass ~= UnitClass("player")) then
         Questie.db.char.townsfolkVersion = dbCompiledCount
         coYield()
         QuestieMenu:BuildCharacterTownsfolk()
-    end
+    end]]
 
     coYield()
     QuestieDB:Initialize()
@@ -238,7 +238,7 @@ end
 QuestieInit.Stages[2] = function()
     Questie:Debug(Questie.DEBUG_INFO, "[QuestieInit:Stage2] Stage 2 start.")
     -- We do this while we wait for the Quest Cache anyway.
-    l10n:PostBoot()
+    --[[l10n:PostBoot()
     QuestiePlayer:Initialize()
     coYield()
     QuestieJourney:Initialize()
@@ -257,14 +257,14 @@ QuestieInit.Stages[2] = function()
     while (not QuestieValidateGameCache:IsCacheGood()) and keepWaiting do
         coYield()
     end
-    keepWaiting = false
+    keepWaiting = false]]
 end
 
 QuestieInit.Stages[3] = function() -- run as a coroutine
     Questie:Debug(Questie.DEBUG_INFO, "[QuestieInit:Stage3] Stage 3 start.")
 
     -- register events that rely on questie being initialized
-    QuestieEventHandler:RegisterLateEvents()
+    --[[QuestieEventHandler:RegisterLateEvents()
 
     -- ** OLD ** Questie:ContinueInit() ** START **
     QuestieTooltips:Initialize()
@@ -301,7 +301,7 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
     -- Initialize the tracker
     coYield()
     QuestieTracker.Initialize()
-    Hooks:HookQuestLogTitle()
+    Hooks:HookQuestLogTitle()]]
     QuestieCombatQueue.Initialize()
 
     local dateToday = date("%y-%m-%d")
@@ -321,17 +321,17 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
         end)
     end
 
-    coYield()
+    --[[coYield()
     QuestieMenu:OnLogin()
 
     coYield()
     if Questie.db.profile.debugEnabled then
         QuestieLoader:PopulateGlobals()
-    end
+    end]]
 
     Questie.started = true
 
-    if (Questie.IsWotlk or Questie.IsTBC) and QuestiePlayer.IsMaxLevel() then
+    --[[if (Questie.IsWotlk or Questie.IsTBC) and QuestiePlayer.IsMaxLevel() then
         local lastRequestWasYesterday = Questie.db.global.lastDailyRequestDate ~= date("%d-%m-%y"); -- Yesterday or some day before
         local isPastDailyReset = Questie.db.global.lastDailyRequestResetTime < GetQuestResetTime();
 
@@ -348,7 +348,7 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
 
     -- We do this last because it will run for a while and we don't want to block the rest of the init
     coYield()
-    AvailableQuests.CalculateAndDrawAll()
+    AvailableQuests.CalculateAndDrawAll()]]
 
     Questie:Debug(Questie.DEBUG_INFO, "[QuestieInit:Stage3] Questie init done.")
 end
