@@ -11,6 +11,7 @@ local ZoneDB = QuestieLoader:ImportModule("ZoneDB")
 local l10n = QuestieLoader:ImportModule("l10n")
 
 --- COMPATIBILITY ---
+local C_Map = QuestieCompat.C_Map
 local UnitRace = QuestieCompat.UnitRace
 local UnitClass = QuestieCompat.UnitClass
 

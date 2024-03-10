@@ -13,6 +13,33 @@ QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC = 5
 QuestieCompat.WOW_PROJECT_WRATH_CLASSIC = 11
 QuestieCompat.WOW_PROJECT_ID = QuestieCompat.WOW_PROJECT_WRATH_CLASSIC
 
+-- Date stuff
+QuestieCompat.CALENDAR_WEEKDAY_NAMES = {
+	WEEKDAY_SUNDAY,
+	WEEKDAY_MONDAY,
+	WEEKDAY_TUESDAY,
+	WEEKDAY_WEDNESDAY,
+	WEEKDAY_THURSDAY,
+	WEEKDAY_FRIDAY,
+	WEEKDAY_SATURDAY,
+};
+
+-- month names show up differently for full date displays in some languages
+QuestieCompat.CALENDAR_FULLDATE_MONTH_NAMES = {
+	FULLDATE_MONTH_JANUARY,
+	FULLDATE_MONTH_FEBRUARY,
+	FULLDATE_MONTH_MARCH,
+	FULLDATE_MONTH_APRIL,
+	FULLDATE_MONTH_MAY,
+	FULLDATE_MONTH_JUNE,
+	FULLDATE_MONTH_JULY,
+	FULLDATE_MONTH_AUGUST,
+	FULLDATE_MONTH_SEPTEMBER,
+	FULLDATE_MONTH_OCTOBER,
+	FULLDATE_MONTH_NOVEMBER,
+	FULLDATE_MONTH_DECEMBER,
+};
+
 -- https://wago.tools/db2/ChrRaces?build=3.4.3.52237
 QuestieCompat.ChrRaces = {
 	Human = 1,
@@ -108,6 +135,14 @@ QuestieCompat.C_Timer = {
     end
 }
 
+QuestieCompat.C_Map = {
+    -- Returns the current UI map for the given unit.
+    -- https://wowpedia.fandom.com/wiki/API_C_Map.GetBestMapForUnit
+	GetBestMapForUnit = function(unitId)
+        return 1412 -- Mulgore
+	end,
+}
+
 QuestieCompat.C_Calendar = {
     -- Returns information about the calendar month by offset.
 	-- https://wowpedia.fandom.com/wiki/API_C_Calendar.GetMonthInfo
@@ -181,6 +216,26 @@ end
 -- Determine if a quest has been completed.
 function QuestieCompat.IsQuestFlaggedCompleted(questID)
 	return false
+end
+
+local questTagIdToName = {
+	[1] = "Group",
+	[41] = "PvP",
+	[62] = "Raid",
+	[81] = "Dungeon",
+	[82] = "World Event",
+	[83] = "Legendary",
+	[84] = "Escort",
+	[85] = "Heroic",
+}
+
+-- Retrieves tag information about the quest.
+-- https://wowpedia.fandom.com/wiki/API_GetQuestTagInfo
+function QuestieCompat.GetQuestTagInfo(questId)
+    local tagId = QuestieCompat.QuestTagId[questId]
+	if tagId then
+		return tagId, questTagIdToName[tagId]
+	end
 end
 
 -- https://wowpedia.fandom.com/wiki/API_UnitAura?oldid=2681338

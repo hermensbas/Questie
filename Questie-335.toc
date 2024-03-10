@@ -114,7 +114,7 @@ Modules\QuestieValidateGameCache.lua
 Modules\QuestieInit.lua
 Modules\MinimapIcon.lua
 Modules\QuestieProfessions.lua
-#Modules\QuestieReputation.lua
+Modules\QuestieReputation.lua
 Modules\QuestieEventHandler.lua
 Modules\Migration.lua
 Modules\QuestieMenu.lua
@@ -170,20 +170,20 @@ Modules\Quest\IsleOfQuelDanas.lua
 #Modules\Network\QuestieCommsData.lua
 
 # Journey
-#Modules\Journey\QuestieJourney.lua
-#Modules\Journey\QuestieJourneyPrivates.lua
-#Modules\Journey\QuestieJourneyUtils.lua
-#Modules\Journey\History.lua
-#Modules\Journey\QuestDetailsFrame.lua
-#Modules\Journey\tabs\MyJourney\Note.lua
-#Modules\Journey\tabs\MyJourney\MyJourney.lua
-#Modules\Journey\tabs\MyJourney\MyJourneyTab.lua
-#Modules\Journey\tabs\QuestsByZone\QuestsByZone.lua
-#Modules\Journey\tabs\QuestsByZone\QuestsByZoneTab.lua
-##Modules\Journey\tabs\Search\Search.lua
-##Modules\Journey\tabs\Search\SearchTab.lua
-#Modules\Journey\QuestieSearch.lua
-#Modules\Journey\QuestieSearchResults.lua
+Modules\Journey\QuestieJourney.lua
+Modules\Journey\QuestieJourneyPrivates.lua
+Modules\Journey\QuestieJourneyUtils.lua
+Modules\Journey\History.lua
+Modules\Journey\QuestDetailsFrame.lua
+Modules\Journey\tabs\MyJourney\Note.lua
+Modules\Journey\tabs\MyJourney\MyJourney.lua
+Modules\Journey\tabs\MyJourney\MyJourneyTab.lua
+Modules\Journey\tabs\QuestsByZone\QuestsByZone.lua
+Modules\Journey\tabs\QuestsByZone\QuestsByZoneTab.lua
+#Modules\Journey\tabs\Search\Search.lua
+#Modules\Journey\tabs\Search\SearchTab.lua
+Modules\Journey\QuestieSearch.lua
+Modules\Journey\QuestieSearchResults.lua
 
 # Tracker
 #Modules\Tracker\QuestieTracker.lua

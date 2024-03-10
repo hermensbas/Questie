@@ -27,5 +27,6 @@
 
     <!--Script file="Libs\Krowi_WorldMapButtons\Krowi_WorldMapButtons-1.4.lua"/-->
 
+    <Script file="QuestTagId.lua"/>
     <Script file="Compat.lua"/>
 </Ui>

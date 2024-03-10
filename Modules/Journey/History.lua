@@ -7,6 +7,8 @@ local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local CALENDAR_FULLDATE_MONTH_NAMES = QuestieCompat.CALENDAR_FULLDATE_MONTH_NAMES
 
 function _QuestieJourney:GetHistory()
     local journeyEntries = _QuestieJourney:GetJourneyEntries()

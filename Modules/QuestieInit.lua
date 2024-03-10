@@ -241,7 +241,7 @@ QuestieInit.Stages[2] = function()
     l10n:PostBoot()
     QuestiePlayer:Initialize()
     coYield()
-    --QuestieJourney:Initialize()
+    QuestieJourney:Initialize()
 
     local keepWaiting = true
     -- We had users reporting that a quest did not reach a valid state in the game cache.

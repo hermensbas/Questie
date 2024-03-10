@@ -10,6 +10,10 @@ local QuestieJourneyUtils = QuestieLoader:ImportModule("QuestieJourneyUtils")
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local CALENDAR_WEEKDAY_NAMES = QuestieCompat.CALENDAR_WEEKDAY_NAMES
+local CALENDAR_FULLDATE_MONTH_NAMES = QuestieCompat.CALENDAR_FULLDATE_MONTH_NAMES
+
 local AceGUI = LibStub("AceGUI-3.0")
 local titleBox, messageBox
 
