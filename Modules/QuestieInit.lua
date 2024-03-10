@@ -96,9 +96,9 @@ local function loadFullDatabase()
     coYield()
     QuestieCorrections:Initialize()
 
-    --print("\124cFF4DDBFF [3/9] " .. l10n("Initializing townfolks") .. "...")
-    --coYield()
-    --QuestieMenu:PopulateTownsfolk()
+    print("\124cFF4DDBFF [3/9] " .. l10n("Initializing townfolks") .. "...")
+    coYield()
+    QuestieMenu:PopulateTownsfolk()
 
     print("\124cFF4DDBFF [4/9] " .. l10n("Initializing locale") .. "...")
     coYield()
@@ -213,11 +213,11 @@ QuestieInit.Stages[1] = function() -- run as a coroutine
 
     local dbCompiledCount = Questie.IsSoD and Questie.db.global.sod.dbCompiledCount or Questie.db.global.dbCompiledCount
 
-    --[[if (not Questie.db.char.townsfolk) or (dbCompiledCount ~= Questie.db.char.townsfolkVersion) or (Questie.db.char.townsfolkClass ~= UnitClass("player")) then
+    if (not Questie.db.char.townsfolk) or (dbCompiledCount ~= Questie.db.char.townsfolkVersion) or (Questie.db.char.townsfolkClass ~= UnitClass("player")) then
         Questie.db.char.townsfolkVersion = dbCompiledCount
         coYield()
         QuestieMenu:BuildCharacterTownsfolk()
-    end]]
+    end
 
     coYield()
     QuestieDB:Initialize()
@@ -292,10 +292,10 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
     coYield()
     WorldMapButton.Initialize()
     coYield()
-    QuestieQuest:GetAllQuestIdsNoObjectives()
+    QuestieQuest:GetAllQuestIdsNoObjectives()]]
     coYield()
     QuestieMenu:PopulateTownsfolkPostBoot()
-    coYield()
+    --[[coYield()
     QuestieQuest:GetAllQuestIds()
 
     -- Initialize the tracker

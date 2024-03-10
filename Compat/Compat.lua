@@ -75,6 +75,18 @@ function QuestieCompat.IsQuestFlaggedCompleted(questID)
 	return false
 end
 
+QuestieCompat.LibUIDropDownMenu = {
+	Create_UIDropDownMenu = function(self, name, parent)
+		return CreateFrame("Frame", name, parent, "UIDropDownMenuTemplate")
+	end,
+	EasyMenu = function(self, menuList, menuFrame, anchor, x, y, displayMode, autoHideDelay)
+		EasyMenu(menuList, menuFrame, anchor, x, y, displayMode, autoHideDelay)
+	end,
+	CloseDropDownMenus = function(self, level)
+        CloseDropDownMenus(level)
+    end,
+}
+
 --[[
     It seems that the table size is capped in 3.3.5, with a maximum of 524,288 entries.
     For instance, this code triggers an error message: 'memory allocation error: block too big.

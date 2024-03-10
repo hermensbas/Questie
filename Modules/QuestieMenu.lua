@@ -29,7 +29,7 @@ local AvailableQuests = QuestieLoader:ImportModule("AvailableQuests")
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
 
-local LibDropDown = LibStub:GetLibrary("LibUIDropDownMenuQuestie-4.0")
+local LibDropDown = QuestieCompat.LibUIDropDownMenu or LibStub:GetLibrary("LibUIDropDownMenuQuestie-4.0")
 
 local _, playerClass = UnitClass("player")
 local playerFaction = UnitFactionGroup("player")
@@ -44,13 +44,13 @@ local _townsfolk_texturemap = {
     ["Spirit Healer"] = "Interface\\raidframe\\raid-icon-rez",
     ["Weapon Master"] = QuestieLib.AddonPath.."Icons\\slay.blp",
     ["Profession Trainer"] = "Interface\\Minimap\\tracking\\profession",
-    ["Ammo"] = 132382,--select(10, GetItemInfo(2515)) -- sharp arrow
-    ["Bags"] = 133634,--select(10, GetItemInfo(4496)) -- small brown pouch
-    ["Potions"] = 134831,--select(10, GetItemInfo(929)) -- Healing Potion
-    ["Trade Goods"] = 132912,--select(10, GetItemInfo(2321)) -- thread
-    ["Drink"] = 134712,--select(10, GetItemInfo(8766)) -- morning glory dew
-    ["Food"] = 133964,--select(10, GetItemInfo(4540)) -- bread
-    ["Pet Food"] = 132165,--select(3, GetSpellInfo(6991)) -- feed pet
+    ["Ammo"] = QuestieCompat.Is335 and "Interface\\Icons\\inv_ammo_arrow_02" or 132382, --select(10, GetItemInfo(2515)) -- sharp arrow
+    ["Bags"] = QuestieCompat.Is335 and "Interface\\Icons\\inv_misc_bag_09" or 133634, --select(10, GetItemInfo(4496)) -- small brown pouch
+    ["Potions"] = QuestieCompat.Is335 and "Interface\\Icons\\inv_potion_51" or 134831, --select(10, GetItemInfo(929)) -- Healing Potion
+    ["Trade Goods"] = QuestieCompat.Is335 and "Interface\\Icons\\inv_fabric_wool_02" or 132912, --select(10, GetItemInfo(2321)) -- thread
+    ["Drink"] = QuestieCompat.Is335 and "Interface\\Icons\\inv_potion_01" or 134712, --select(10, GetItemInfo(8766)) -- morning glory dew
+    ["Food"] = QuestieCompat.Is335 and "Interface\\Icons\\inv_misc_food_11" or 133964, --select(10, GetItemInfo(4540)) -- bread
+    ["Pet Food"] = QuestieCompat.Is335 and "Interface\\Icons\\ability_hunter_beasttraining" or 132165, --select(3, GetSpellInfo(6991)) -- feed pet
     ["Portal Trainer"] = "Interface\\Minimap\\vehicle-alliancemageportal",
     ["Reagents"] = (function()
         if playerClass == "ROGUE" then
