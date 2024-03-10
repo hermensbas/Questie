@@ -65,6 +65,9 @@ local QuestieNPCFixes = QuestieLoader:ImportModule("QuestieNPCFixes")
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local C_Calendar = QuestieCompat.C_Calendar
+local C_DateAndTime = QuestieCompat.C_DateAndTime
 
 local tinsert = table.insert
 local _WithinDates, _LoadDarkmoonFaire, _GetDarkmoonFaireLocation, _GetDarkmoonFaireLocationEra, _GetDarkmoonFaireLocationSoD

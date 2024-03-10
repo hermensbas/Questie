@@ -235,7 +235,7 @@ do
                  -- This is done with a delay because on startup the Blizzard API seems to be
                  -- very slow and therefore the date calculation in QuestieEvents isn't done
                  -- correctly.
-                --QuestieEvent:Load()
+                QuestieEvent:Load()
             end)
         end
     end

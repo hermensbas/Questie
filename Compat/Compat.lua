@@ -69,6 +69,37 @@ QuestieCompat.C_Timer = {
     end
 }
 
+QuestieCompat.C_Calendar = {
+    -- Returns information about the calendar month by offset.
+	-- https://wowpedia.fandom.com/wiki/API_C_Calendar.GetMonthInfo
+	GetMonthInfo = function(offsetMonths)
+		local month, year, numdays, firstday = CalendarGetMonth(offsetMonth);
+		return {
+			month = month,
+			year = year,
+			numDays = numdays,
+			firstWeekday = firstday,
+		}
+	end,
+}
+
+QuestieCompat.C_DateAndTime = {
+    -- Returns the realm's current date and time.
+	-- https://wowpedia.fandom.com/wiki/API_C_DateAndTime.GetCurrentCalendarTime
+	GetCurrentCalendarTime = function()
+		local weekday, month, day, year = CalendarGetDate();
+		local hours, minutes = GetGameTime()
+		return {
+			year = year,
+			month = month,
+			monthDay = day,
+			weekday = weekday,
+			hour = hours,
+			minute = minutes
+		}
+	end
+}
+
 -- https://wowpedia.fandom.com/wiki/API_IsQuestFlaggedCompleted
 -- Determine if a quest has been completed.
 function QuestieCompat.IsQuestFlaggedCompleted(questID)
