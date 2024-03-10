@@ -100,6 +100,35 @@ QuestieCompat.C_DateAndTime = {
 	end
 }
 
+QuestieCompat.C_QuestLog = {
+	-- Returns info for the objectives of a quest. (https://wowpedia.fandom.com/wiki/API_C_QuestLog.GetQuestObjectives)
+	GetQuestObjectives = function(questID, questLogIndex)
+		local questObjectives = {}
+        if questLogIndex then
+		    local numObjectives = GetNumQuestLeaderBoards(questLogIndex);
+		    for i = 1, numObjectives do
+		    	-- https://wowpedia.fandom.com/wiki/API_GetQuestLogLeaderBoard
+		    	local description, objectiveType, isCompleted = GetQuestLogLeaderBoard(i, questLogIndex);
+		    	local objectiveName, numFulfilled, numRequired = string.match(description, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
+		    	table.insert(questObjectives, {
+		    		text = description,
+		    		type = objectiveType,
+		    		finished = isCompleted and true or false,
+		    		numFulfilled = tonumber(numFulfilled),
+		    		numRequired = tonumber(numRequired),
+		    	})
+		    end
+        end
+		return questObjectives -- can be empty for quests without objectives
+	end,
+}
+
+-- Can't find anything about this function.
+-- Apparently, it returns true when quest data is ready to be queried.
+function QuestieCompat.HaveQuestData(questID)
+	return true
+end
+
 -- https://wowpedia.fandom.com/wiki/API_GetQuestLogTitle?oldid=2214753
 -- Returns information about a quest in your quest log.
 -- Patch 6.0.2 (2014-10-14): Removed returns 'questTag'.

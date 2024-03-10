@@ -110,7 +110,7 @@ Modules\Libs\QuestieCombatQueue.lua
 Modules\Libs\RamerDouglasPeucker.lua
 
 # Modules
-#Modules\QuestieValidateGameCache.lua
+Modules\QuestieValidateGameCache.lua
 Modules\QuestieInit.lua
 Modules\MinimapIcon.lua
 Modules\QuestieProfessions.lua

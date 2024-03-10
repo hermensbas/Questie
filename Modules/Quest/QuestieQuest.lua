@@ -1,5 +1,5 @@
 --- COMPATIBILITY ---
-local IsQuestFlaggedCompleted = IsQuestFlaggedCompleted or C_QuestLog.IsQuestFlaggedCompleted
+local IsQuestFlaggedCompleted = QuestieCompat.IsQuestFlaggedCompleted or C_QuestLog.IsQuestFlaggedCompleted
 
 ---@class QuestieQuest
 local QuestieQuest = QuestieLoader:CreateModule("QuestieQuest")

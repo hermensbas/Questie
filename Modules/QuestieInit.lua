@@ -238,10 +238,10 @@ end
 QuestieInit.Stages[2] = function()
     Questie:Debug(Questie.DEBUG_INFO, "[QuestieInit:Stage2] Stage 2 start.")
     -- We do this while we wait for the Quest Cache anyway.
-    --[[l10n:PostBoot()
-    QuestiePlayer:Initialize()
+    l10n:PostBoot()
+    --[[QuestiePlayer:Initialize()
     coYield()
-    QuestieJourney:Initialize()
+    QuestieJourney:Initialize()]]
 
     local keepWaiting = true
     -- We had users reporting that a quest did not reach a valid state in the game cache.
@@ -257,7 +257,7 @@ QuestieInit.Stages[2] = function()
     while (not QuestieValidateGameCache:IsCacheGood()) and keepWaiting do
         coYield()
     end
-    keepWaiting = false]]
+    keepWaiting = false
 end
 
 QuestieInit.Stages[3] = function() -- run as a coroutine

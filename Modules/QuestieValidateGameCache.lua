@@ -16,8 +16,10 @@ local QuestieValidateGameCache = QuestieLoader:CreateModule("QuestieValidateGame
 local QuestieLib = QuestieLoader:CreateModule("QuestieLib")
 
 --- COMPATIBILITY ---
-local GetNumQuestLogEntries, GetQuestObjectives = GetNumQuestLogEntries, C_QuestLog.GetQuestObjectives
+local GetNumQuestLogEntries = GetNumQuestLogEntries
 local GetQuestLogTitle = QuestieCompat.GetQuestLogTitle
+local GetQuestObjectives = QuestieCompat.C_QuestLog.GetQuestObjectives
+local HaveQuestData = QuestieCompat.HaveQuestData
 
 local stringByte, tremove = string.byte, table.remove
 local tpack =  QuestieLib.tpack
@@ -87,7 +89,7 @@ local function OnQuestLogUpdate()
                 isQuestLogGood = false
             else
                 local hasInvalidObjective -- for debug stats
-                local objectiveList = GetQuestObjectives(questId)
+                local objectiveList = GetQuestObjectives(questId, i)
 
                 if type(objectiveList) ~= "table" then
                     -- I couldn't find yet a quest returning nil like older code suggested for example for quest 2744, which isn't true.
@@ -142,6 +144,10 @@ local function OnQuestLogUpdate()
 end
 
 local function OnPlayerEnteringWorld(_, _, isInitialLogin, isReloadingUi)
+    -- 335 Cant find a way to distinguish between 'first login' and 'UI reload'
+    if QuestieCompat.Is335 then
+        isInitialLogin, isReloadingUi = false, true -- 335 Not skipping for now
+    end
     assert(isInitialLogin or isReloadingUi) -- We should get to here only at login or at /reload.
 
     -- Game's quest log has still old cached data on the first QUEST_LOG_UPDATE after PLAYER_ENTERING_WORLD during login.

@@ -245,4 +245,4 @@ Questie.LOWLEVEL_OFFSET = 3
 Questie.LOWLEVEL_RANGE = 4
 
 -- Start checking the game's cache.
---QuestieValidateGameCache.StartCheck()
+QuestieValidateGameCache.StartCheck()

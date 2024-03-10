@@ -10,7 +10,8 @@ local Sounds = QuestieLoader:ImportModule("Sounds")
 
 --- COMPATIBILITY ---
 local GetQuestLogTitle = QuestieCompat.GetQuestLogTitle
-local C_QuestLog_GetQuestObjectives =  C_QuestLog.GetQuestObjectives
+local C_QuestLog_GetQuestObjectives =  QuestieCompat.C_QuestLog.GetQuestObjectives
+local HaveQuestData = QuestieCompat.HaveQuestData
 
 local stringByte = string.byte
 
@@ -82,10 +83,10 @@ QuestLogCache.questLog_DO_NOT_MODIFY = cache
 
 
 ---@return table? newObjectives, ObjectiveIndex[] changedObjIds @nil == cache miss in both addon and game caches. table {} == no objectives.
-local function GetNewObjectives(questId, oldObjectives)
+local function GetNewObjectives(questId, oldObjectives, questLogIndex)
     local newObjectives = {} -- creating a fresh one to be able revert to old easily in case of missing data
     local changedObjIds -- not assigning {} for easier nil when nothing changed
-    local objectives = C_QuestLog_GetQuestObjectives(questId)
+    local objectives = C_QuestLog_GetQuestObjectives(questId, questLogIndex)
 
     for objIndex=1, #objectives do -- iterate manually to be sure getting those in order
         local oldObj = oldObjectives[objIndex]
@@ -168,7 +169,7 @@ function QuestLogCache.CheckForChanges(questIdsToCheck)
                 local cachedQuest = cache[questId]
                 local cachedObjectives = cachedQuest and cachedQuest.objectives or {}
 
-                local newObjectives, changedObjIds = GetNewObjectives(questId, cachedObjectives)
+                local newObjectives, changedObjIds = GetNewObjectives(questId, cachedObjectives, questLogIndex)
 
                 if newObjectives then
                     if (not cachedQuest) or (#cachedObjectives == #newObjectives and #cachedObjectives > 0 and
@@ -222,7 +223,7 @@ function QuestLogCache.CheckForChanges(questIdsToCheck)
                 --   Does NOT trigger getting objectives data! (read: item data related to objectives)
 
                 -- Speed up caching of objective items as HaveQuestData() won't trigger game to cache those.
-                C_QuestLog_GetQuestObjectives(questId)
+                C_QuestLog_GetQuestObjectives(questId, questLogIndex)
 
                 cacheMiss = true
             end
@@ -274,7 +275,7 @@ function QuestLogCache.TestGameCache()
         end
         if (not isHeader) then
             if HaveQuestData(questId) then
-                local objectives = C_QuestLog_GetQuestObjectives(questId)
+                local objectives = C_QuestLog_GetQuestObjectives(questId, questLogIndex)
 
                 for objIndex=1, #objectives do
                     local text = objectives[objIndex].text

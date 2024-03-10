@@ -2,7 +2,7 @@
 local DailyQuests = QuestieLoader:CreateModule("DailyQuests");
 local _DailyQuests = {}
 
-local IsQuestFlaggedCompleted = IsQuestFlaggedCompleted or C_QuestLog.IsQuestFlaggedCompleted
+local IsQuestFlaggedCompleted = QuestieCompat.IsQuestFlaggedCompleted or C_QuestLog.IsQuestFlaggedCompleted
 
 ---@type QuestieMap
 local QuestieMap = QuestieLoader:ImportModule("QuestieMap");
