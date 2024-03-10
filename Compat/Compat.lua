@@ -13,6 +13,45 @@ QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC = 5
 QuestieCompat.WOW_PROJECT_WRATH_CLASSIC = 11
 QuestieCompat.WOW_PROJECT_ID = QuestieCompat.WOW_PROJECT_WRATH_CLASSIC
 
+-- https://wago.tools/db2/ChrRaces?build=3.4.3.52237
+QuestieCompat.ChrRaces = {
+	Human = 1,
+	Orc = 2,
+	Dwarf = 3,
+	NightElf = 4,
+	Scourge = 5,
+	Tauren = 6,
+	Gnome = 7,
+	Troll = 8,
+	Goblin = 9,
+	BloodElf = 10,
+	Draenei = 11,
+	FelOrc = 12,
+	Naga_ = 13,
+	Broken = 14,
+	Skeleton = 15,
+	Vrykul = 16,
+	Tuskarr = 17,
+	ForestTroll = 18,
+	Taunka = 19,
+	NorthrendSkeleton = 20,
+	IceTroll = 21,
+}
+
+-- https://wago.tools/db2/ChrClasses?build=3.4.3.52237
+QuestieCompat.ChrClasses = {
+	WARRIOR = 1,
+	PALADIN = 2,
+	HUNTER = 3,
+	ROGUE = 4,
+	PRIEST = 5,
+	DEATHKNIGHT = 6,
+	SHAMAN = 7,
+	MAGE = 8,
+	WARLOCK = 9,
+	DRUID = 11,
+}
+
 local inactiveTimers = {}
 
 local function timerCancel(self)
@@ -156,6 +195,21 @@ end
 
 function QuestieCompat.GetMaxPlayerLevel()
 	return QuestieCompat.MAX_PLAYER_LEVEL or 80
+end
+
+-- Returns the race of the unit.
+-- https://wowpedia.fandom.com/wiki/API_UnitRace
+function QuestieCompat.UnitRace(unit)
+    local raceName, raceFile = UnitRace(unit)
+    return raceName, raceFile, QuestieCompat.ChrRaces[raceFile]
+end
+
+-- Returns the class of the unit.
+-- https://wowpedia.fandom.com/wiki/API_UnitClass
+-- Patch 5.0.4 (2012-08-28): Added classId return value.
+function QuestieCompat.UnitClass(unit)
+    local className, classFile = UnitClass(unit)
+    return className, classFile, QuestieCompat.ChrClasses[classFile]
 end
 
 QuestieCompat.LibUIDropDownMenu = {
