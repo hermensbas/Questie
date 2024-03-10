@@ -8,8 +8,11 @@ local QuestieLib = QuestieLoader:ImportModule("QuestieLib")
 ---@type Sounds
 local Sounds = QuestieLoader:ImportModule("Sounds")
 
+--- COMPATIBILITY ---
+local GetQuestLogTitle = QuestieCompat.GetQuestLogTitle
+local C_QuestLog_GetQuestObjectives =  C_QuestLog.GetQuestObjectives
+
 local stringByte = string.byte
-local GetQuestLogTitle, C_QuestLog_GetQuestObjectives = GetQuestLogTitle, C_QuestLog.GetQuestObjectives
 
 -- 3 * (Max possible number of quests in game quest log)
 -- This is a safe value, even smaller would be enough. Too large won't effect performance

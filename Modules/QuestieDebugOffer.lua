@@ -18,6 +18,7 @@ local l10n = QuestieLoader:ImportModule("l10n")
 
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
+local GetQuestLogTitle = QuestieCompat.GetQuestLogTitle
 
 local DebugInformation = {} -- stores text of debug data dump per session
 local debugIndex = 0 -- current debug index, used so we can still retrieve info from previous offers

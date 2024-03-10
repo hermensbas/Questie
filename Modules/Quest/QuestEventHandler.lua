@@ -33,6 +33,7 @@ local l10n = QuestieLoader:ImportModule("l10n")
 
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
+local GetQuestLogTitle = QuestieCompat.GetQuestLogTitle
 
 local tableRemove = table.remove
 

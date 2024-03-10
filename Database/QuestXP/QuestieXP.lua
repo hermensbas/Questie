@@ -5,6 +5,10 @@ local QuestXP = QuestieLoader:CreateModule("QuestXP")
 ---@type table<QuestId,table<Level,XP>> -- { questId={level, xp}, ..... }
 QuestXP.db = {}
 
+--- COMPATIBILITY ---
+local UnitBuff = QuestieCompat.UnitBuff
+local GetMaxPlayerLevel = QuestieCompat.GetMaxPlayerLevel
+
 local floor = floor
 local UnitLevel = UnitLevel
 

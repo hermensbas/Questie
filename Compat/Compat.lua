@@ -100,10 +100,33 @@ QuestieCompat.C_DateAndTime = {
 	end
 }
 
+-- https://wowpedia.fandom.com/wiki/API_GetQuestLogTitle?oldid=2214753
+-- Returns information about a quest in your quest log.
+-- Patch 6.0.2 (2014-10-14): Removed returns 'questTag'.
+function QuestieCompat.GetQuestLogTitle(questLogIndex)
+    local questTitle, level, questTag, suggestedGroup, isHeader, isCollapsed,
+        isComplete, isDaily, questID = GetQuestLogTitle(questLogIndex);
+    return questTitle, level, suggestedGroup, isHeader, isCollapsed, isComplete, isDaily and 2 or 1, questID
+end
+
 -- https://wowpedia.fandom.com/wiki/API_IsQuestFlaggedCompleted
 -- Determine if a quest has been completed.
 function QuestieCompat.IsQuestFlaggedCompleted(questID)
 	return false
+end
+
+-- https://wowpedia.fandom.com/wiki/API_UnitAura?oldid=2681338
+-- Returns the buffs/debuffs for the unit.
+-- an alias for UnitAura(unit, index, "HELPFUL"), returning only buffs.
+-- Patch 8.0.1 (2018-07-17): Removed 'rank' return value.
+function QuestieCompat.UnitBuff(unit, index)
+    local name, rank, icon, count, debuffType, duration, expirationTime,
+        unitCaster, isStealable, shouldConsolidate, spellId = UnitBuff(unit, index)
+    return name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, shouldConsolidate, spellId
+end
+
+function QuestieCompat.GetMaxPlayerLevel()
+	return QuestieCompat.MAX_PLAYER_LEVEL or 80
 end
 
 QuestieCompat.LibUIDropDownMenu = {
