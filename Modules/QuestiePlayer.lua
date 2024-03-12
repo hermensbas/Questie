@@ -14,6 +14,9 @@ local l10n = QuestieLoader:ImportModule("l10n")
 local C_Map = QuestieCompat.C_Map
 local UnitRace = QuestieCompat.UnitRace
 local UnitClass = QuestieCompat.UnitClass
+local IsInGroup = QuestieCompat.IsInGroup
+local GetHomePartyInfo = QuestieCompat.GetHomePartyInfo
+local LE_PARTY_CATEGORY_INSTANCE = QuestieCompat.LE_PARTY_CATEGORY_INSTANCE
 
 QuestiePlayer.currentQuestlog = {} --Gets populated by QuestieQuest:GetAllQuestIds(), this is either an object to the quest in question, or the ID if the object doesn't exist.
 _QuestiePlayer.playerLevel = -1

@@ -13,6 +13,10 @@ QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC = 5
 QuestieCompat.WOW_PROJECT_WRATH_CLASSIC = 11
 QuestieCompat.WOW_PROJECT_ID = QuestieCompat.WOW_PROJECT_WRATH_CLASSIC
 
+-- check for a specific type of group
+QuestieCompat.LE_PARTY_CATEGORY_HOME = 1 -- home-realm parties
+QuestieCompat.LE_PARTY_CATEGORY_INSTANCE = 2 -- instance-specific groups
+
 -- Date stuff
 QuestieCompat.CALENDAR_WEEKDAY_NAMES = {
 	WEEKDAY_SUNDAY,
@@ -277,6 +281,34 @@ function QuestieCompat.GetFactionInfo(factionIndex)
 
     return name, description, standingId, bottomValue, topValue, earnedValue, atWarWith,
         canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, QuestieCompat.FactionId[name:trim()]
+end
+
+-- Returns true if the player is in a group.
+-- https://wowpedia.fandom.com/wiki/API_IsInGroup
+function QuestieCompat.IsInGroup(groupType)
+    if groupType then return false end
+    return UnitInParty("player") and GetNumPartyMembers() > 0
+end
+
+-- Returns true if the player is in a raid.
+-- https://wowpedia.fandom.com/wiki/API_IsInRaid
+function QuestieCompat.IsInRaid(groupType)
+    if groupType then return false end
+    return UnitInRaid("player") and GetNumRaidMembers() > 0
+end
+
+-- Returns names of characters in your home (non-instance) party.
+-- https://wowpedia.fandom.com/wiki/API_GetHomePartyInfo
+function QuestieCompat.GetHomePartyInfo(homePlayers)
+	if UnitInParty("player") then
+		homePlayers = homePlayers or {}
+		for i=1, MAX_PARTY_MEMBERS do
+			if GetPartyMember(i) then
+				table.insert(homePlayers, UnitName("party"..i))
+			end
+		end
+		return homePlayers
+	end
 end
 
 QuestieCompat.LibUIDropDownMenu = {

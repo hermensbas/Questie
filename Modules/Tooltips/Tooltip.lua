@@ -15,6 +15,9 @@ local QuestieDB = QuestieLoader:ImportModule("QuestieDB");
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local IsInGroup = QuestieCompat.IsInGroup
+
 local tinsert = table.insert
 QuestieTooltips.lastGametooltip = ""
 QuestieTooltips.lastGametooltipCount = -1;
