@@ -267,6 +267,18 @@ function QuestieCompat.UnitClass(unit)
     return className, classFile, QuestieCompat.ChrClasses[classFile]
 end
 
+-- Returns info for a faction.
+-- https://wowpedia.fandom.com/wiki/API_GetFactionInfo
+-- Patch 5.0.4 (2012-08-28): Added new return value: factionID
+-- TODO: localize factions name(https://www.curseforge.com/wow/addons/libbabble-faction-3-0)
+function QuestieCompat.GetFactionInfo(factionIndex)
+    local name, description, standingId, bottomValue, topValue, earnedValue, atWarWith,
+        canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild = GetFactionInfo(factionIndex)
+
+    return name, description, standingId, bottomValue, topValue, earnedValue, atWarWith,
+        canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, QuestieCompat.FactionId[name:trim()]
+end
+
 QuestieCompat.LibUIDropDownMenu = {
 	Create_UIDropDownMenu = function(self, name, parent)
 		return CreateFrame("Frame", name, parent, "UIDropDownMenuTemplate")

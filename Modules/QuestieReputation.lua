@@ -3,12 +3,15 @@ local QuestieReputation = QuestieLoader:CreateModule("QuestieReputation")
 ---@type QuestieQuest
 local QuestieQuest = QuestieLoader:ImportModule("QuestieQuest")
 
+--- COMPATIBILITY ---
+local GetFactionInfo = QuestieCompat.GetFactionInfo
+
 local playerReputations = {}
 
 local _ReachedNewStanding, _WinterSaberChanged
 
 -- Fast local references
-local ExpandFactionHeader, GetNumFactions, GetFactionInfo = ExpandFactionHeader, GetNumFactions, GetFactionInfo
+local ExpandFactionHeader, GetNumFactions = ExpandFactionHeader, GetNumFactions
 
 --- Updates all factions a player already discovered and checks if any of these
 --- reached a new reputation level
