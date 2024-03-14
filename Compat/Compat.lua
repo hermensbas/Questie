@@ -7,7 +7,7 @@ QuestieCompat.NOOP_MT = {__index = function() return QuestieCompat.NOOP end}
 QuestieCompat.frame = CreateFrame("Frame")
 QuestieCompat.frame:RegisterEvent("ADDON_LOADED")
 QuestieCompat.frame:SetScript("OnEvent", function(self, event, ...)
-    QuestieCompat[event](...)
+    QuestieCompat[event](self, event, ...)
 end)
 
 -- current expansion level (https://wowpedia.fandom.com/wiki/WOW_PROJECT_ID)
@@ -314,6 +314,7 @@ function QuestieCompat.GetHomePartyInfo(homePlayers)
 	end
 end
 
+-- https://wowpedia.fandom.com/wiki/API_UnitGUID?oldid=2507049
 local GUIDType = {
     [0]="Player",
     [1]="GameObject",
@@ -341,9 +342,29 @@ end
 -- https://wowpedia.fandom.com/wiki/API_GetQuestID
 function QuestieCompat.GetQuestID(questStarter)
 	local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
-	return QuestieDB.GetQuestIDFromName(GetTitleText(), QuestieCompat.UnitGUID("npc"), questStarter)
+	return QuestieDB.GetQuestIDFromName(GetTitleText(), QuestieCompat.UnitGUID("target"), questStarter)
 end
 
+-- Gets a list of the auction house item classes.
+-- https://wowpedia.fandom.com/wiki/API_GetAuctionItemClasses?oldid=1835520
+local itemClass = {GetAuctionItemClasses()}
+for classId, className in ipairs(itemClass) do
+    itemClass[className] = classId
+    itemClass[classId] = nil
+end
+
+-- Returns info for an item.
+-- https://wowpedia.fandom.com/wiki/API_GetItemInfo?oldid=2376031
+-- Patch 7.0.3 (2016-07-19): Added classID, subclassID returns.
+function QuestieCompat.GetItemInfo(item)
+    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
+        itemSubType, itemStackCount,itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(item)
+
+    return itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
+        itemSubType, itemStackCount,itemEquipLoc, itemTexture, itemSellPrice, itemClass[itemType]
+end
+
+-- https://wowpedia.fandom.com/wiki/API_IsSpellKnown
 QuestieCompat.IsSpellKnownOrOverridesKnown = IsSpellKnown
 QuestieCompat.IsPlayerSpell = IsSpellKnown
 
@@ -401,7 +422,33 @@ function QuestieCompat.Save(self)
 	return result
 end
 
-function QuestieCompat.ADDON_LOADED(addon)
+function QuestieCompat.QuestEventHandler_RegisterEvents(_QuestEventHandler)
+    for _, event in pairs({
+        "TRADE_CLOSED",
+        "MERCHANT_CLOSED",
+        "BANKFRAME_CLOSED",
+        "GUILDBANKFRAME_CLOSED",
+        "VENDOR_CLOSED",
+        "MAIL_CLOSED",
+        "AUCTION_HOUSE_CLOSED",
+    }) do
+        QuestieCompat.frame:RegisterEvent(event)
+        QuestieCompat[event] = _QuestEventHandler.QuestRelatedFrameClosed
+    end
+
+    hooksecurefunc("GetQuestReward", function(itemChoice)
+        local questId = QuestieCompat.GetQuestID()
+        _QuestEventHandler:QuestTurnedIn(questId)
+        _QuestEventHandler:QuestRemoved(questId)
+    end)
+
+    hooksecurefunc("AbandonQuest", function()
+        local questId = select(9, GetQuestLogTitle(GetQuestLogSelection()))
+        _QuestEventHandler:QuestRemoved(questId)
+    end)
+end
+
+function QuestieCompat:ADDON_LOADED(event, addon)
 	if addon == QuestieCompat.addonName then
         local ZoneDB = QuestieLoader:ImportModule("ZoneDB")
         ZoneDB.private.RunTests = QuestieCompat.NOOP
@@ -410,6 +457,9 @@ function QuestieCompat.ADDON_LOADED(addon)
             "HBDHooks",
             "QuestieDebugOffer",
             "QuestieNameplate",
+            "QuestieQuest",
+            "QuestieTracker",
+            "QuestieAnnounce",
         }) do
             local module = QuestieLoader:ImportModule(moduleName)
             setmetatable(module, QuestieCompat.NOOP_MT)
@@ -419,5 +469,10 @@ function QuestieCompat.ADDON_LOADED(addon)
         QuestieStream._writeByte = QuestieCompat._writeByte
         QuestieStream._readByte = QuestieCompat._readByte
         QuestieStream.Save = QuestieCompat.Save
+
+        local QuestEventHandler = QuestieLoader:ImportModule("QuestEventHandler")
+        hooksecurefunc(QuestEventHandler, "RegisterEvents", function()
+            QuestieCompat.QuestEventHandler_RegisterEvents(QuestEventHandler.private)
+        end)
     end
 end

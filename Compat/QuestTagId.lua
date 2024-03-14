@@ -1,3 +1,4 @@
+-- https://www.wowhead.com/wotlk/quests/type:1:41:62:81:82:84:85
 QuestieCompat.QuestTagId = {
 	[19] = 1,
 	[105] = 1,

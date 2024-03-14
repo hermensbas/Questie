@@ -34,6 +34,7 @@ local l10n = QuestieLoader:ImportModule("l10n")
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
 local GetQuestLogTitle = QuestieCompat.GetQuestLogTitle
+local GetItemInfo = QuestieCompat.GetItemInfo
 
 local tableRemove = table.remove
 
@@ -143,7 +144,7 @@ function QuestEventHandler:RegisterEvents()
 
                 for i = 1, STATICPOPUP_NUMDIALOGS do
                     frame = _G["StaticPopup" .. i]
-                    if (frame:IsShown()) and frame.text.text_arg1 == text_arg1 then
+                    if (frame:IsShown()) and ((frame.text.text_arg1 == text_arg1) or (string.find(frame.text:GetText(), text_arg1))) then
                         text = _G[frame:GetName() .. "Text"]
                         break
                     end
@@ -198,6 +199,7 @@ end
 ---@param questLogIndex number
 ---@param questId number
 function _QuestEventHandler:QuestAccepted(questLogIndex, questId)
+    questId = questId or select(8, GetQuestLogTitle(questLogIndex))
     Questie:Debug(Questie.DEBUG_DEVELOP, "[Quest Event] QUEST_ACCEPTED", questLogIndex, questId)
 
     if questLog[questId] and questLog[questId].timer then
@@ -291,9 +293,9 @@ function _QuestEventHandler:QuestTurnedIn(questId, xpReward, moneyReward)
         doFullQuestLogScan = true
     end
 
-    local _, _, _, quality, _, itemID = GetQuestLogRewardInfo(GetNumQuestLogRewards(questId), questId)
+    local itemName, _, _, quality, _, itemID = GetQuestLogRewardInfo(GetNumQuestLogRewards(questId), questId)
 
-    if itemID ~= nil and quality == 1 then
+    if (itemID ~= nil or itemName ~= nil) and quality == 1 then
         Questie:Debug(Questie.DEBUG_DEVELOP, "Quest:", questId, "Recieved a possible Quest Item - do a full Quest Log check")
         doFullQuestLogScan = true
         skipNextUQLCEvent = false
@@ -462,7 +464,7 @@ local lastTimeQuestRelatedFrameClosedEvent = -1
 --- Blizzard does not fire any event when quest items are received or retrieved from sources other than looting.
 --- So we hook events which fires once or twice after closing certain frames and do a full quest log check.
 function _QuestEventHandler:QuestRelatedFrameClosed(event)
-    local now = GetTime()
+    local now = math.floor(GetTime())
     -- Don't do update if event fired twice
     if lastTimeQuestRelatedFrameClosedEvent ~= now then
         Questie:Debug(Questie.DEBUG_DEVELOP, "[Quest Event]", event)

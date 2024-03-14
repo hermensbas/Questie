@@ -154,10 +154,10 @@ Modules\QuestiePlayer.lua
 
 # Quest
 #Modules\Quest\AvailableQuests.lua
-#Modules\Quest\QuestLogCache.lua
+Modules\Quest\QuestLogCache.lua
 Modules\Quest\DailyQuests.lua
 Modules\Quest\IsleOfQuelDanas.lua
-#Modules\Quest\QuestEventHandler.lua
+Modules\Quest\QuestEventHandler.lua
 #Modules\Quest\QuestgiverFrame.lua
 #Modules\Quest\QuestieQuest.lua
 #Modules\Quest\QuestieQuestPrivates.lua

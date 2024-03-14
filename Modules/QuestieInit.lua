@@ -278,12 +278,12 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
 
     if Questie.db.profile.dbmHUDEnable then
         QuestieDBMIntegration:EnableHUD()
-    end
+    end]]
     -- ** OLD ** Questie:ContinueInit() ** END **
 
     coYield()
     QuestEventHandler:RegisterEvents()
-    coYield()
+    --[[coYield()
     ChatFilter:RegisterEvents()
     QuestieMap:InitializeQueue()
 
