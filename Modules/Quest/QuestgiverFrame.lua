@@ -7,6 +7,9 @@ local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
 ---@type QuestieLib
 local QuestieLib = QuestieLoader:ImportModule("QuestieLib")
 
+--- COMPATIBILITY ---
+local UnitGUID = QuestieCompat.UnitGUID
+
 local _G = _G
 local tinsert = tinsert
 local MAX_NUM_QUESTS = MAX_NUM_QUESTS

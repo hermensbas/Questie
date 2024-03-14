@@ -150,7 +150,7 @@ QuestieInit.Stages[1] = function() -- run as a coroutine
 
     MinimapIcon:Init()
 
-    --HBDHooks:Init()
+    HBDHooks:Init()
 
     Questie:SetIcons()
 

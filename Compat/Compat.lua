@@ -1,6 +1,9 @@
 -- addon/folder name
 QuestieCompat.addonName = "Questie-335"
+
 QuestieCompat.NOOP = function() end
+QuestieCompat.NOOP_MT = {__index = function() return QuestieCompat.NOOP end}
+
 QuestieCompat.frame = CreateFrame("Frame")
 QuestieCompat.frame:RegisterEvent("ADDON_LOADED")
 QuestieCompat.frame:SetScript("OnEvent", function(self, event, ...)
@@ -311,6 +314,39 @@ function QuestieCompat.GetHomePartyInfo(homePlayers)
 	end
 end
 
+local GUIDType = {
+    [0]="Player",
+    [1]="GameObject",
+    [3]="Creature",
+    [4]="Pet",
+    [5]="Vehicle"
+}
+
+-- Returns the GUID of the unit.
+-- https://wowpedia.fandom.com/wiki/GUID
+-- Patch 6.0.2 (2014-10-14): Changed to a new format
+function QuestieCompat.UnitGUID(unit)
+    local guid = UnitGUID(unit)
+    if guid then
+        local type = tonumber(guid:sub(5,5), 16) % 8
+        if type and (type == 1 or type == 3 or type == 5) then
+            local id = tonumber(guid:sub(9, 12), 16)
+            -- Creature-0-[serverID]-[instanceID]-[zoneUID]-[npcID]-[spawnUID]
+            return string.format("%s-0-4170-0-41-%d-00000F4B37", GUIDType[type], id)
+        end
+    end
+end
+
+-- Returns the ID of the displayed quest at a quest giver.
+-- https://wowpedia.fandom.com/wiki/API_GetQuestID
+function QuestieCompat.GetQuestID(questStarter)
+	local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
+	return QuestieDB.GetQuestIDFromName(GetTitleText(), QuestieCompat.UnitGUID("npc"), questStarter)
+end
+
+QuestieCompat.IsSpellKnownOrOverridesKnown = IsSpellKnown
+QuestieCompat.IsPlayerSpell = IsSpellKnown
+
 QuestieCompat.LibUIDropDownMenu = {
 	Create_UIDropDownMenu = function(self, name, parent)
 		return CreateFrame("Frame", name, parent, "UIDropDownMenuTemplate")
@@ -369,6 +405,15 @@ function QuestieCompat.ADDON_LOADED(addon)
 	if addon == QuestieCompat.addonName then
         local ZoneDB = QuestieLoader:ImportModule("ZoneDB")
         ZoneDB.private.RunTests = QuestieCompat.NOOP
+
+        for _, moduleName in pairs({
+            "HBDHooks",
+            "QuestieDebugOffer",
+            "QuestieNameplate",
+        }) do
+            local module = QuestieLoader:ImportModule(moduleName)
+            setmetatable(module, QuestieCompat.NOOP_MT)
+        end
 
         local QuestieStream = QuestieLoader:ImportModule("QuestieStreamLib")
         QuestieStream._writeByte = QuestieCompat._writeByte

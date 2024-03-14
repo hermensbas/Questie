@@ -56,6 +56,8 @@ local QUEST_FLAGS_WEEKLY_X2 = 2 * QUEST_FLAGS_WEEKLY
 local WOW_PROJECT_ID = QuestieCompat.WOW_PROJECT_ID
 local WOW_PROJECT_CLASSIC = QuestieCompat.WOW_PROJECT_CLASSIC
 local GetQuestTagInfo = QuestieCompat.GetQuestTagInfo
+local IsPlayerSpell = QuestieCompat.IsPlayerSpell
+local IsSpellKnownOrOverridesKnown = QuestieCompat.IsSpellKnownOrOverridesKnown
 local IsQuestFlaggedCompleted = QuestieCompat.IsQuestFlaggedCompleted or C_QuestLog.IsQuestFlaggedCompleted
 
 --- Tag corrections for quests for which the API returns the wrong values.

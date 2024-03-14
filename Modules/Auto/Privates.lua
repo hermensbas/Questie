@@ -5,6 +5,10 @@ local QuestieAuto = QuestieLoader:ImportModule("QuestieAuto")
 ---@field disallowedQuests table<QuestId, boolean>
 local _QuestieAuto = QuestieAuto.private
 
+--- COMPATIBILITY ---
+local UnitGUID = QuestieCompat.UnitGUID
+local GetQuestID = QuestieCompat.GetQuestID
+
 function _QuestieAuto:AllQuestWindowsClosed()
     if GossipFrame and (not GossipFrame:IsVisible())
         and GossipFrameGreetingPanel and (not GossipFrameGreetingPanel:IsVisible())

@@ -8,9 +8,6 @@ local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
 ---@type QuestieQuestBlacklist
 local QuestieQuestBlacklist = QuestieLoader:ImportModule("QuestieQuestBlacklist")
 
---- COMPATIBILITY ---
-local GetMaxPlayerLevel = QuestieCompat.GetMaxPlayerLevel
-
 SeasonOfDiscovery.currentPhase = 1 -- TODO: Use API function which hopefully will come in the future
 
 local runeQuestsInSoD = {-- List quests here to have them flagged as Rune quests in Season of Discovery

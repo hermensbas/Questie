@@ -64,7 +64,7 @@ Database\Corrections\QuestieCorrections.lua
 Database\Corrections\QuestieItemBlacklist.lua
 Database\Corrections\QuestieNPCBlacklist.lua
 Database\Corrections\QuestieQuestBlacklist.lua
-Database\Corrections\SoMPhases.lua
+#Database\Corrections\SoMPhases.lua
 Database\Corrections\QuestieEvent.lua
 
 # Automatic General Corrections
@@ -155,7 +155,7 @@ Modules\QuestiePlayer.lua
 # Quest
 #Modules\Quest\AvailableQuests.lua
 #Modules\Quest\QuestLogCache.lua
-#Modules\Quest\DailyQuests.lua
+Modules\Quest\DailyQuests.lua
 Modules\Quest\IsleOfQuelDanas.lua
 #Modules\Quest\QuestEventHandler.lua
 #Modules\Quest\QuestgiverFrame.lua

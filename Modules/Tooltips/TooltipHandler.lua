@@ -5,6 +5,9 @@ local _QuestieTooltips = QuestieTooltips.private
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local UnitGUID = QuestieCompat.UnitGUID
+
 local lastGuid
 
 function _QuestieTooltips:AddUnitDataToTooltip()
