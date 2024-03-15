@@ -219,10 +219,26 @@ function QuestieCompat.GetQuestLogTitle(questLogIndex)
     return questTitle, level, suggestedGroup, isHeader, isCollapsed, isComplete, isDaily and 2 or 1, questID
 end
 
+-- Returns a list of quests the character has completed in its lifetime.
+-- https://wowpedia.fandom.com/wiki/API_GetQuestsCompleted
+function QuestieCompat.GetQuestsCompleted()
+    if not Questie.db.char.complete then
+        Questie.db.char.complete = {}
+    end
+    QueryQuestsCompleted()
+    return Questie.db.char.complete
+end
+
+-- Fires when the data requested by QueryQuestsCompleted() is available.
+-- https://wowpedia.fandom.com/wiki/QUEST_QUERY_COMPLETE
+function QuestieCompat:QUEST_QUERY_COMPLETE(event)
+    GetQuestsCompleted(Questie.db.char.complete)
+end
+
 -- https://wowpedia.fandom.com/wiki/API_IsQuestFlaggedCompleted
 -- Determine if a quest has been completed.
 function QuestieCompat.IsQuestFlaggedCompleted(questID)
-	return false
+	return Questie.db.char.complete[questID]
 end
 
 local questTagIdToName = {
@@ -380,6 +396,55 @@ QuestieCompat.LibUIDropDownMenu = {
     end,
 }
 
+QuestieCompat.HBD = setmetatable({}, QuestieCompat.NOOP_MT)
+
+--[[
+    xpcall wrapper implementation
+]]
+local xpcall = xpcall
+
+local function errorhandler(err)
+	return geterrorhandler()(err)
+end
+
+local function CreateDispatcher(argCount)
+	local code = [[
+		local xpcall, errorhandler = ...
+		local method, ARGS
+		local function call() return method(ARGS) end
+
+		local function dispatch(func, eh, ...)
+			 method = func
+			 if not method then return end
+			 ARGS = ...
+			 return xpcall(call, eh or errorhandler)
+		end
+
+		return dispatch
+	]]
+
+	local ARGS = {}
+	for i = 1, argCount do ARGS[i] = "arg"..i end
+	code = code:gsub("ARGS", table.concat(ARGS, ", "))
+	return assert(loadstring(code, "safecall Dispatcher["..argCount.."]"))(xpcall, errorhandler)
+end
+
+local Dispatchers = setmetatable({}, {__index=function(self, argCount)
+	local dispatcher = CreateDispatcher(argCount)
+	rawset(self, argCount, dispatcher)
+	return dispatcher
+end})
+
+Dispatchers[0] = function(func, eh)
+	return xpcall(func, eh or errorhandler)
+end
+
+function QuestieCompat.xpcall(func, eh, ...)
+    if type(func) == "function" then
+		return Dispatchers[select('#', ...)](func, eh, ...)
+	end
+end
+
 --[[
     It seems that the table size is capped in 3.3.5, with a maximum of 524,288 entries.
     For instance, this code triggers an error message: 'memory allocation error: block too big.
@@ -435,6 +500,7 @@ function QuestieCompat.QuestEventHandler_RegisterEvents(_QuestEventHandler)
         QuestieCompat.frame:RegisterEvent(event)
         QuestieCompat[event] = _QuestEventHandler.QuestRelatedFrameClosed
     end
+    QuestieCompat.frame:RegisterEvent("QUEST_QUERY_COMPLETE")
 
     hooksecurefunc("GetQuestReward", function(itemChoice)
         local questId = QuestieCompat.GetQuestID()
@@ -448,22 +514,39 @@ function QuestieCompat.QuestEventHandler_RegisterEvents(_QuestEventHandler)
     end)
 end
 
+-- prevents the override of existing global variables with the same name(e.g., WorldMapButton)
+function QuestieCompat.PopulateGlobals(self)
+    for name, module in pairs(QuestieLoader._modules) do
+        if not _G[name] then
+            _G[name] = module
+        end
+    end
+end
+
 function QuestieCompat:ADDON_LOADED(event, addon)
 	if addon == QuestieCompat.addonName then
         local ZoneDB = QuestieLoader:ImportModule("ZoneDB")
         ZoneDB.private.RunTests = QuestieCompat.NOOP
+        QuestieLoader.PopulateGlobals = QuestieCompat.PopulateGlobals
 
         for _, moduleName in pairs({
             "HBDHooks",
             "QuestieDebugOffer",
+            "SeasonOfDiscovery",
+            "QuestieDBMIntegration",
             "QuestieNameplate",
-            "QuestieQuest",
-            "QuestieTracker",
             "QuestieAnnounce",
+            "QuestieTooltips",
+            "QuestieMap",
         }) do
             local module = QuestieLoader:ImportModule(moduleName)
             setmetatable(module, QuestieCompat.NOOP_MT)
         end
+        local QuestieMap = QuestieLoader:ImportModule("QuestieMap")
+        QuestieMap.FindClosestStarter = function() return {} end
+        QuestieMap.utils = {CalcHotzones = function() return {} end}
+        QuestieMap.questIdFrames = {}
+        Questie.db.profile.trackerEnabled = false
 
         local QuestieStream = QuestieLoader:ImportModule("QuestieStreamLib")
         QuestieStream._writeByte = QuestieCompat._writeByte

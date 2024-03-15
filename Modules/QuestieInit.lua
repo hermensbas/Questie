@@ -285,23 +285,23 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
     QuestEventHandler:RegisterEvents()
     --[[coYield()
     ChatFilter:RegisterEvents()
-    QuestieMap:InitializeQueue()
+    QuestieMap:InitializeQueue()]]
 
     coYield()
     QuestieQuest:Initialize()
+    --coYield()
+    --WorldMapButton.Initialize()
     coYield()
-    WorldMapButton.Initialize()
-    coYield()
-    QuestieQuest:GetAllQuestIdsNoObjectives()]]
+    QuestieQuest:GetAllQuestIdsNoObjectives()
     coYield()
     QuestieMenu:PopulateTownsfolkPostBoot()
-    --[[coYield()
+    coYield()
     QuestieQuest:GetAllQuestIds()
 
     -- Initialize the tracker
     coYield()
     QuestieTracker.Initialize()
-    Hooks:HookQuestLogTitle()]]
+    --Hooks:HookQuestLogTitle()
     QuestieCombatQueue.Initialize()
 
     local dateToday = date("%y-%m-%d")
@@ -321,17 +321,17 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
         end)
     end
 
-    --[[coYield()
+    coYield()
     QuestieMenu:OnLogin()
 
     coYield()
     if Questie.db.profile.debugEnabled then
         QuestieLoader:PopulateGlobals()
-    end]]
+    end
 
     Questie.started = true
 
-    --[[if (Questie.IsWotlk or Questie.IsTBC) and QuestiePlayer.IsMaxLevel() then
+    if (Questie.IsWotlk or Questie.IsTBC) and QuestiePlayer.IsMaxLevel() then
         local lastRequestWasYesterday = Questie.db.global.lastDailyRequestDate ~= date("%d-%m-%y"); -- Yesterday or some day before
         local isPastDailyReset = Questie.db.global.lastDailyRequestResetTime < GetQuestResetTime();
 
@@ -348,7 +348,7 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
 
     -- We do this last because it will run for a while and we don't want to block the rest of the init
     coYield()
-    AvailableQuests.CalculateAndDrawAll()]]
+    AvailableQuests.CalculateAndDrawAll()
 
     Questie:Debug(Questie.DEBUG_INFO, "[QuestieInit:Stage3] Questie init done.")
 end
