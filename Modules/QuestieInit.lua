@@ -284,8 +284,8 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
     coYield()
     QuestEventHandler:RegisterEvents()
     --[[coYield()
-    ChatFilter:RegisterEvents()
-    QuestieMap:InitializeQueue()]]
+    ChatFilter:RegisterEvents()]]
+    QuestieMap:InitializeQueue()
 
     coYield()
     QuestieQuest:Initialize()

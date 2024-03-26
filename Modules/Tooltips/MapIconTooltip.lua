@@ -25,7 +25,7 @@ local QuestXP = QuestieLoader:ImportModule("QuestXP")
 --- COMPATIBILITY ---
 local C_Map = QuestieCompat.C_Map
 
-local HBDPins = LibStub("HereBeDragonsQuestie-Pins-2.0")
+local HBDPins = QuestieCompat.HBDPins or LibStub("HereBeDragonsQuestie-Pins-2.0")
 
 
 local REPUTATION_ICON_PATH = QuestieLib.AddonPath .. "Icons\\reputation.blp"

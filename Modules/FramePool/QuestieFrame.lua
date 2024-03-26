@@ -16,7 +16,7 @@ local QuestieQuest = QuestieLoader:ImportModule("QuestieQuest")
 --- COMPATIBILITY ---
 local C_Map = QuestieCompat.C_Map
 
-local HBDPins = LibStub("HereBeDragonsQuestie-Pins-2.0")
+local HBDPins = QuestieCompat.HBDPins or LibStub("HereBeDragonsQuestie-Pins-2.0")
 
 QuestieFramePool.Qframe = {}
 
@@ -56,8 +56,11 @@ function QuestieFramePool.Qframe:New(frameId, OnEnter)
     newTexture:SetWidth(16)
     newTexture:SetHeight(16)
     newTexture:SetAllPoints(newFrame)
-    newTexture:SetTexelSnappingBias(0)
-    newTexture:SetSnapToPixelGrid(false)
+
+    if not QuestieCompat.Is335 then
+        newTexture:SetTexelSnappingBias(0)
+        newTexture:SetSnapToPixelGrid(false)
+    end
 
     local glowt = newFrame.glow:CreateTexture(nil, "OVERLAY", nil, -1)
     glowt:SetWidth(18)

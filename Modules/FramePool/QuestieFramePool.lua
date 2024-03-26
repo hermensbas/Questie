@@ -17,7 +17,7 @@ local l10n = QuestieLoader:ImportModule("l10n")
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
 
-local HBDPins = LibStub("HereBeDragonsQuestie-Pins-2.0")
+local HBDPins = QuestieCompat.HBDPins or LibStub("HereBeDragonsQuestie-Pins-2.0")
 
 -- set pins parent to QuestieFrameGroup for easier compatibility with other addons
 -- cant use this because it fucks with everything, but we gotta stick with HereBeDragonsQuestie anyway

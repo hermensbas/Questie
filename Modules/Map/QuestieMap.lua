@@ -53,7 +53,7 @@ local fadeOverDistance = 10;
 local normalizedValue = 1 / fadeOverDistance; --Opacity / Distance to fade over
 
 local HBD = QuestieCompat.HBD or LibStub("HereBeDragonsQuestie-2.0")
-local HBDPins = LibStub("HereBeDragonsQuestie-Pins-2.0")
+local HBDPins = QuestieCompat.HBDPins or LibStub("HereBeDragonsQuestie-Pins-2.0")
 
 --We should really try and squeeze out all the performance we can, especially in this.
 local tostring = tostring;

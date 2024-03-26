@@ -593,15 +593,13 @@ function QuestieCompat:ADDON_LOADED(event, addon)
             "QuestieNameplate",
             "QuestieAnnounce",
             "QuestieTooltips",
-            "QuestieMap",
         }) do
             local module = QuestieLoader:ImportModule(moduleName)
             setmetatable(module, QuestieCompat.NOOP_MT)
         end
         local QuestieMap = QuestieLoader:ImportModule("QuestieMap")
-        QuestieMap.FindClosestStarter = function() return {} end
-        QuestieMap.utils = {CalcHotzones = function() return {} end}
-        QuestieMap.questIdFrames = {}
+        QuestieMap.DrawWaypoints = QuestieCompat.NOOP
+
         Questie.db.profile.trackerEnabled = false
 
         local QuestieStream = QuestieLoader:ImportModule("QuestieStreamLib")
