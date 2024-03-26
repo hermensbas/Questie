@@ -6,6 +6,7 @@ local l10n = QuestieLoader:ImportModule("l10n")
 
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
+local C_Map = QuestieCompat.C_Map
 
 local posX = 0;
 local posY = 0;

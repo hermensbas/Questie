@@ -13,6 +13,9 @@ local QuestieLink = QuestieLoader:ImportModule("QuestieLink")
 ---@type QuestieQuest
 local QuestieQuest = QuestieLoader:ImportModule("QuestieQuest")
 
+--- COMPATIBILITY ---
+local C_Map = QuestieCompat.C_Map
+
 local HBDPins = LibStub("HereBeDragonsQuestie-Pins-2.0")
 
 QuestieFramePool.Qframe = {}

@@ -142,11 +142,69 @@ QuestieCompat.C_Timer = {
     end
 }
 
+local mapIdToUiMapId = {}
+for uiMapId, data in pairs(QuestieCompat.UiMapData) do
+    mapIdToUiMapId[data.mapID] = uiMapId
+end
+
+function QuestieCompat.GetCurrentUiMapID()
+    return mapIdToUiMapId[GetCurrentMapAreaID() + GetCurrentMapDungeonLevel()/10]
+end
+
+function QuestieCompat.GetCurrentPlayerPosition()
+	local x, y = GetPlayerMapPosition("player");
+	if ( x <= 0 and y <= 0 ) then
+		if ( WorldMapFrame:IsVisible() ) then
+			-- we know there is a visible world map, so don't cause
+			-- WORLD_MAP_UPDATE events by changing map zoom
+			return;
+		end
+		SetMapToCurrentZone();
+		x, y = GetPlayerMapPosition("player");
+		if ( x <= 0 and y <= 0 ) then
+			-- attempt to zoom out once - logic copied from WorldMapZoomOutButton_OnClick()
+				if ( ZoomOut() ) then
+					-- do nothing
+				elseif ( GetCurrentMapZone() ~= WORLDMAP_WORLD_ID ) then
+					SetMapZoom(GetCurrentMapContinent());
+				else
+					SetMapZoom(WORLDMAP_WORLD_ID);
+				end
+			x, y = GetPlayerMapPosition("player");
+			if ( x <= 0 and y <= 0 ) then
+				-- we are in an instance without a map or otherwise off map
+				return;
+			end
+		end
+	end
+	return QuestieCompat.GetCurrentUiMapID(), x, y;
+end
+
 QuestieCompat.C_Map = {
+    -- Returns map information.
+	-- https://wowpedia.fandom.com/wiki/API_C_Map.GetMapInfo
+	GetMapInfo = function(uiMapID)
+        if QuestieCompat.UiMapData[uiMapID] then
+            return QuestieCompat.UiMapData[uiMapID]
+        end
+	end,
+    -- Returns a map subzone name.
+    -- https://wowpedia.fandom.com/wiki/API_C_Map.GetAreaInfo
+	GetAreaInfo = function(areaID)
+        return
+	end,
     -- Returns the current UI map for the given unit.
     -- https://wowpedia.fandom.com/wiki/API_C_Map.GetBestMapForUnit
-	GetBestMapForUnit = function(unitId)
-        return 1412 -- Mulgore
+	GetBestMapForUnit = function(unit)
+        if unit == "player" then
+            return QuestieCompat.GetCurrentPlayerPosition()
+        end
+	end,
+    -- Translates a map position to a world map position.
+    -- https://wowpedia.fandom.com/wiki/API_C_Map.GetWorldPosFromMapPos
+	GetWorldPosFromMapPos = function(uiMapID, mapPos)
+        local x, y, instanceID = QuestieCompat.HBD:GetWorldCoordinatesFromZone(mapPos.x, mapPos.y, uiMapID)
+        return instanceID, {x = x, y = y}
 	end,
 }
 
@@ -395,8 +453,6 @@ QuestieCompat.LibUIDropDownMenu = {
         CloseDropDownMenus(level)
     end,
 }
-
-QuestieCompat.HBD = setmetatable({}, QuestieCompat.NOOP_MT)
 
 --[[
     xpcall wrapper implementation

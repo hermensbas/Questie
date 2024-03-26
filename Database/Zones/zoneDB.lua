@@ -21,6 +21,9 @@ local QuestieProfessions = QuestieLoader:ImportModule("QuestieProfessions")
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
 
+--- COMPATIBILITY ---
+local C_Map = QuestieCompat.C_Map
+
 local areaIdToUiMapId = ZoneDB.private.areaIdToUiMapId or {}
 local uiMapIdToAreaId = ZoneDB.private.uiMapIdToAreaId or {}
 local dungeons = ZoneDB.private.dungeons or {}

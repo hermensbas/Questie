@@ -22,6 +22,9 @@ local l10n = QuestieLoader:ImportModule("l10n")
 ---@type QuestXP
 local QuestXP = QuestieLoader:ImportModule("QuestXP")
 
+--- COMPATIBILITY ---
+local C_Map = QuestieCompat.C_Map
+
 local HBDPins = LibStub("HereBeDragonsQuestie-Pins-2.0")
 
 

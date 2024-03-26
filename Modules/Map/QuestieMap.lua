@@ -25,6 +25,7 @@ local WeaponMasterSkills = QuestieLoader:ImportModule("WeaponMasterSkills")
 
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
+local C_Map = QuestieCompat.C_Map
 
 QuestieMap.ICON_MAP_TYPE = "MAP";
 QuestieMap.ICON_MINIMAP_TYPE = "MINIMAP";
@@ -51,7 +52,7 @@ QuestieMap.manualFrames = {}
 local fadeOverDistance = 10;
 local normalizedValue = 1 / fadeOverDistance; --Opacity / Distance to fade over
 
-local HBD = LibStub("HereBeDragonsQuestie-2.0")
+local HBD = QuestieCompat.HBD or LibStub("HereBeDragonsQuestie-2.0")
 local HBDPins = LibStub("HereBeDragonsQuestie-Pins-2.0")
 
 --We should really try and squeeze out all the performance we can, especially in this.

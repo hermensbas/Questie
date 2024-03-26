@@ -6,7 +6,7 @@ QuestieMap.utils = QuestieMap.utils or {}
 ---@type QuestieLib
 local QuestieLib = QuestieLoader:ImportModule("QuestieLib");
 
-local HBD = LibStub("HereBeDragonsQuestie-2.0")
+local HBD = QuestieCompat.HBD or LibStub("HereBeDragonsQuestie-2.0")
 
 local ZOOM_MODIFIER = 1;
 
