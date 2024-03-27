@@ -148,7 +148,11 @@ for uiMapId, data in pairs(QuestieCompat.UiMapData) do
 end
 
 function QuestieCompat.GetCurrentUiMapID()
-    return mapIdToUiMapId[GetCurrentMapAreaID() + GetCurrentMapDungeonLevel()/10]
+    local mapID = GetCurrentMapAreaID()
+    if mapID == 0 then -- both the "Cosmic" and "Azeroth" maps return a mapID of 0
+        mapID = GetCurrentMapContinent()
+    end
+    return mapIdToUiMapId[mapID + GetCurrentMapDungeonLevel()/10]
 end
 
 function QuestieCompat.GetCurrentPlayerPosition()
