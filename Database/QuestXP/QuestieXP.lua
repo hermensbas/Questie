@@ -8,6 +8,7 @@ QuestXP.db = {}
 --- COMPATIBILITY ---
 local UnitBuff = QuestieCompat.UnitBuff
 local GetMaxPlayerLevel = QuestieCompat.GetMaxPlayerLevel
+local GetQuestLogRewardMoney = QuestieCompat.GetQuestLogRewardMoney
 
 local floor = floor
 local UnitLevel = UnitLevel

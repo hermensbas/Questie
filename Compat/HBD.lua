@@ -153,13 +153,33 @@ local minimapPinRegistry = {}
 local worldmapPins = {}
 local worldmapPinRegistry = {}
 
+
+QuestieCompat.WorldMapFrame = {
+    IsShown = function(self)
+        return WorldMapFrame:IsShown()
+    end,
+    GetMapID = QuestieCompat.GetCurrentUiMapID,
+    SetMapID = function(self, UiMapID)
+        local mapID = mapData[UiMapID].mapID
+        local mapLevel = QuestieCompat.Round(mapID%1 * 10)
+
+        SetMapByID(math.floor(mapID) - 1)
+        if mapLevel > 0 then
+            SetDungeonMapLevel(mapLevel)
+        end
+    end,
+    EnumeratePinsByTemplate = function(self, template)
+        return pairs(worldmapPins)
+    end,
+}
+
 local pins = {
     Minimap = Minimap,
     updateFrame = CreateFrame("Frame"),
     activeMinimapPins = activeMinimapPins,
+    worldmapPins = worldmapPins,
     worldmapProvider = {
-        GetMap = function(self) return self.CurrentMap end,
-        CurrentMap = {GetMapID = QuestieCompat.GetCurrentUiMapID},
+        GetMap = function(self) return QuestieCompat.WorldMapFrame end,
     },
 }
 QuestieCompat.HBDPins = pins
@@ -774,6 +794,7 @@ function pins:AddWorldMapIconWorld(ref, icon, instanceID, x, y, showFlag, frameL
 
     worldmapPins[icon] = t
 
+    icon.icon = icon --LOL!
     icon:SetParent(WorldMapButton)
     HandleWorldMapPin(icon, t)
 end
@@ -820,6 +841,7 @@ function pins:AddWorldMapIconMap(ref, icon, uiMapID, x, y, showFlag, frameLevel)
 
     worldmapPins[icon] = t
 
+    icon.icon = icon --LOL!
     icon:SetParent(WorldMapButton)
     HandleWorldMapPin(icon, t)
 end

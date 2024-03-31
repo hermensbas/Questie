@@ -24,6 +24,10 @@ local QuestXP = QuestieLoader:ImportModule("QuestXP")
 
 --- COMPATIBILITY ---
 local C_Map = QuestieCompat.C_Map
+local WorldMapFrame = QuestieCompat.WorldMapFrame
+local FormatLargeNumber = QuestieCompat.FormatLargeNumber
+local GetQuestLogRewardMoney = QuestieCompat.GetQuestLogRewardMoney
+local GetClassColor = QuestieCompat.GetClassColor
 
 local HBDPins = QuestieCompat.HBDPins or LibStub("HereBeDragonsQuestie-Pins-2.0")
 
@@ -32,7 +36,7 @@ local REPUTATION_ICON_PATH = QuestieLib.AddonPath .. "Icons\\reputation.blp"
 local REPUTATION_ICON_TEXTURE = "|T" .. REPUTATION_ICON_PATH .. ":14:14:2:0|t"
 
 local TRANSPARENT_ICON_PATH = "Interface\\Minimap\\UI-bonusobjectiveblob-inside.blp"
-local TRANSPARENT_ICON_TEXTURE = "|T" .. TRANSPARENT_ICON_PATH .. ":14:14:2:0|t"
+local TRANSPARENT_ICON_TEXTURE = QuestieCompat.Is335 and "" or "|T" .. TRANSPARENT_ICON_PATH .. ":14:14:2:0|t"
 
 local DEFAULT_WAYPOINT_HOVER_COLOR = { 0.93, 0.46, 0.13, 0.8 }
 
@@ -50,7 +54,7 @@ function MapIconTooltip:Show()
     end
     lastTooltipShowTimestamp = GetTime()
 
-    local Tooltip = GameTooltip;
+    local Tooltip = QuestieCompat.Is335 and QuestieCompat.SetupTooltip(self) or GameTooltip;
     Tooltip._owner = self;
     Tooltip:SetOwner(self, "ANCHOR_CURSOR"); --"ANCHOR_CURSOR" or (self, self)
 

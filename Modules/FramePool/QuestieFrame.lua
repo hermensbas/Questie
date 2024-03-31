@@ -15,6 +15,7 @@ local QuestieQuest = QuestieLoader:ImportModule("QuestieQuest")
 
 --- COMPATIBILITY ---
 local C_Map = QuestieCompat.C_Map
+local WorldMapFrame = QuestieCompat.WorldMapFrame
 
 local HBDPins = QuestieCompat.HBDPins or LibStub("HereBeDragonsQuestie-Pins-2.0")
 
@@ -156,6 +157,8 @@ function _Qframe:OnLeave()
         self.data.touchedPins = nil;
     end
     GameTooltip.ShownAsMapIcon = false
+
+    if QuestieCompat.Is335 then QuestieCompat.SetupTooltip(self, true) end
 end
 
 function _Qframe:OnClick(button)

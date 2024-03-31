@@ -357,6 +357,7 @@ function _EventHandler:ModifierStateChanged(key, down)
 
         -- Questie Map Icons
         if MouseIsOver(WorldMapFrame) and WorldMapFrame:IsShown() or MouseIsOver(Minimap) then
+            local GameTooltip = QuestieCompat.Tooltip
             if GameTooltip and GameTooltip:IsShown() and GameTooltip._Rebuild then
                 GameTooltip:Hide()
                 GameTooltip:ClearLines()

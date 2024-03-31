@@ -264,11 +264,11 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
     Questie:Debug(Questie.DEBUG_INFO, "[QuestieInit:Stage3] Stage 3 start.")
 
     -- register events that rely on questie being initialized
-    --[[QuestieEventHandler:RegisterLateEvents()
+    QuestieEventHandler:RegisterLateEvents()
 
     -- ** OLD ** Questie:ContinueInit() ** START **
     QuestieTooltips:Initialize()
-    QuestieCoords:Initialize()
+    --[[QuestieCoords:Initialize()
     TrackerQuestTimers:Initialize()
     QuestieComms:Initialize()
 

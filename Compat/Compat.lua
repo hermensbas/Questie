@@ -281,6 +281,34 @@ function QuestieCompat.GetQuestLogTitle(questLogIndex)
     return questTitle, level, suggestedGroup, isHeader, isCollapsed, isComplete, isDaily and 2 or 1, questID
 end
 
+-- https://wowpedia.fandom.com/wiki/API_GetQuestLogRewardMoney
+-- Returns the amount of money rewarded for a quest.
+function QuestieCompat.GetQuestLogRewardMoney(questID)
+    local rewardMoney = QuestieCompat.RewardMoney[questID] or 0
+	local rewardMoneyDifficulty = QuestieCompat.RewardMoneyDifficulty[questID] or 0
+
+    if rewardMoney < 0 then -- required money
+        return rewardMoney
+    end
+
+    local QuestiePlayer = QuestieLoader:ImportModule("QuestiePlayer")
+    local playerLevel = QuestiePlayer.GetPlayerLevel()
+    if playerLevel > 0 and rewardMoneyDifficulty > 0 then
+        rewardMoney = QuestieCompat.QuestMoneyReward[playerLevel][rewardMoneyDifficulty]
+    end
+
+    -- https://wowpedia.fandom.com/wiki/Quest?oldid=1035002 Formula is XP gained * 6c
+    if QuestiePlayer.IsMaxLevel() then
+        local QuestXP = QuestieLoader:ImportModule("QuestXP")
+        local xpReward = QuestXP:GetQuestLogRewardXP(questID, true)
+        if xpReward > 0 then
+            rewardMoney = rewardMoney + xpReward*6
+        end
+    end
+
+    return rewardMoney
+end
+
 -- Returns a list of quests the character has completed in its lifetime.
 -- https://wowpedia.fandom.com/wiki/API_GetQuestsCompleted
 function QuestieCompat.GetQuestsCompleted()
@@ -446,6 +474,61 @@ end
 QuestieCompat.IsSpellKnownOrOverridesKnown = IsSpellKnown
 QuestieCompat.IsPlayerSpell = IsSpellKnown
 
+local LARGE_NUMBER_SEPERATOR = ".";
+function QuestieCompat.FormatLargeNumber(amount)
+	amount = tostring(amount);
+	local newDisplay = "";
+	local strlen = amount:len();
+	--Add each thing behind a comma
+	for i=4, strlen, 3 do
+		newDisplay = LARGE_NUMBER_SEPERATOR..amount:sub(-(i - 1), -(i - 3))..newDisplay;
+	end
+	--Add everything before the first comma
+	newDisplay = amount:sub(1, (strlen % 3 == 0) and 3 or (strlen % 3))..newDisplay;
+	return newDisplay;
+end
+
+local function Round(value)
+	if value < 0.0 then
+		return math.ceil(value - .5);
+	end
+	return math.floor(value + .5);
+end
+QuestieCompat.Round = Round
+
+local function GenerateHexColor(r, g, b, a)
+	return ("ff%.2x%.2x%.2x"):format(Round(r * 255), Round(g * 255), Round(b * 255), Round((a or 1) * 255));
+end
+
+-- Returns the color value associated with a given class.
+function QuestieCompat.GetClassColor(classFilename)
+	local color = RAID_CLASS_COLORS[classFilename];
+	if color then
+		return color.r, color.g, color.b, GenerateHexColor(color.r, color.g, color.b)
+	end
+	return 1, 1, 1, "ffffffff";
+end
+
+function QuestieCompat.SetupTooltip(frame, OnHide)
+    if (frame:GetParent() == WorldMapFrame) then
+        local miniWorldMap = WORLDMAP_SETTINGS.size == WORLDMAP_WINDOWED_SIZE
+        if (not miniWorldMap) then
+            WorldMapFrame:EnableKeyboard(OnHide and true or false)
+        end
+        WorldMapBlobFrame:SetScript("OnUpdate", OnHide and WorldMapBlobFrame_OnUpdate or nil)
+        QuestieCompat.Tooltip = WorldMapTooltip
+    else
+        QuestieCompat.Tooltip = GameTooltip
+    end
+    return QuestieCompat.Tooltip
+end
+
+local empty_table = {}
+function QuestieCompat.TextWrap(self, line, prefix, combineTrailing, desiredWidth)
+    QuestieCompat.Tooltip:AddLine(line, 0.86, 0.86, 0.86, 1);
+    return empty_table
+end
+
 QuestieCompat.LibUIDropDownMenu = {
 	Create_UIDropDownMenu = function(self, name, parent)
 		return CreateFrame("Frame", name, parent, "UIDropDownMenuTemplate")
@@ -585,10 +668,6 @@ end
 
 function QuestieCompat:ADDON_LOADED(event, addon)
 	if addon == QuestieCompat.addonName then
-        local ZoneDB = QuestieLoader:ImportModule("ZoneDB")
-        ZoneDB.private.RunTests = QuestieCompat.NOOP
-        QuestieLoader.PopulateGlobals = QuestieCompat.PopulateGlobals
-
         for _, moduleName in pairs({
             "HBDHooks",
             "QuestieDebugOffer",
@@ -596,15 +675,27 @@ function QuestieCompat:ADDON_LOADED(event, addon)
             "QuestieDBMIntegration",
             "QuestieNameplate",
             "QuestieAnnounce",
-            "QuestieTooltips",
+            "QuestieComms",
+            "QuestieAuto",
+            "QuestgiverFrame",
         }) do
             local module = QuestieLoader:ImportModule(moduleName)
             setmetatable(module, QuestieCompat.NOOP_MT)
         end
+
+        QuestieLoader.PopulateGlobals = QuestieCompat.PopulateGlobals
+
+        local ZoneDB = QuestieLoader:ImportModule("ZoneDB")
+        ZoneDB.private.RunTests = QuestieCompat.NOOP
+
+        local QuestieLib = QuestieLoader:ImportModule("QuestieLib")
+        QuestieLib.TextWrap = QuestieCompat.TextWrap
+
+        local QuestieComms = QuestieLoader:ImportModule("QuestieComms")
+        QuestieComms.remotePlayerEnabled = {}
+
         local QuestieMap = QuestieLoader:ImportModule("QuestieMap")
         QuestieMap.DrawWaypoints = QuestieCompat.NOOP
-
-        Questie.db.profile.trackerEnabled = false
 
         local QuestieStream = QuestieLoader:ImportModule("QuestieStreamLib")
         QuestieStream._writeByte = QuestieCompat._writeByte
@@ -615,5 +706,7 @@ function QuestieCompat:ADDON_LOADED(event, addon)
         hooksecurefunc(QuestEventHandler, "RegisterEvents", function()
             QuestieCompat.QuestEventHandler_RegisterEvents(QuestEventHandler.private)
         end)
+
+        Questie.db.profile.trackerEnabled = false
     end
 end

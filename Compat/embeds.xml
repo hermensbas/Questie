@@ -29,6 +29,7 @@
 
     <Script file="FactionId.lua"/>
     <Script file="QuestTagId.lua"/>
+    <Script file="QuestMoneyReward.lua"/>
     <Script file="UiMapData.lua"/>
     <Script file="Compat.lua"/>
     <Script file="HBD.lua"/>

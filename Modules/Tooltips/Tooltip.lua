@@ -17,6 +17,7 @@ local l10n = QuestieLoader:ImportModule("l10n")
 
 --- COMPATIBILITY ---
 local IsInGroup = QuestieCompat.IsInGroup
+local GetClassColor = QuestieCompat.GetClassColor
 
 local tinsert = table.insert
 QuestieTooltips.lastGametooltip = ""
