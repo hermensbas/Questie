@@ -28,6 +28,9 @@ local QuestieCombatQueue = QuestieLoader:ImportModule("QuestieCombatQueue")
 local l10n = QuestieLoader:ImportModule("l10n")
 local LSM30 = LibStub("LibSharedMedia-3.0")
 
+--- COMPATIBILITY ---
+local C_QuestLog = QuestieCompat.C_QuestLog
+
 local headerFrame, trackerBaseFrame
 
 function TrackerHeaderFrame.Initialize(baseFrame)

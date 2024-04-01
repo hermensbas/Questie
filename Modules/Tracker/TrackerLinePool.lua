@@ -33,8 +33,10 @@ local l10n = QuestieLoader:ImportModule("l10n")
 
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
+local C_QuestLog = QuestieCompat.C_QuestLog
+local GetQuestLogIndexByID = QuestieCompat.GetQuestLogIndexByID
 
-local LibDropDown = LibStub:GetLibrary("LibUIDropDownMenuQuestie-4.0")
+local LibDropDown = QuestieCompat.LibUIDropDownMenu or LibStub:GetLibrary("LibUIDropDownMenuQuestie-4.0")
 local LSM30 = LibStub("LibSharedMedia-3.0")
 
 local linePoolSize = 250
@@ -481,7 +483,7 @@ function TrackerLinePool.Initialize(questFrame)
         local btn = CreateFrame("Button", buttonName, UIParent, "SecureActionButtonTemplate")
         local cooldown = CreateFrame("Cooldown", nil, btn, "CooldownFrameTemplate")
         btn.range = btn:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmallGray")
-        btn.count = btn:CreateFontString(nil, "ARTWORK", "Game10Font_o1")
+        btn.count = btn:CreateFontString(nil, "ARTWORK", QuestieCompat.Is335 and "SystemFont_Outline_Small" or "Game10Font_o1")
         btn:Hide()
 
         if Questie.db.profile.trackerFadeQuestItemButtons then

@@ -158,6 +158,9 @@ QuestieCompat.WorldMapFrame = {
     IsShown = function(self)
         return WorldMapFrame:IsShown()
     end,
+    Show = function(self)
+        ShowUIPanel(WorldMapFrame)
+    end,
     GetMapID = QuestieCompat.GetCurrentUiMapID,
     SetMapID = function(self, UiMapID)
         local mapID = mapData[UiMapID].mapID

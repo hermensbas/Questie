@@ -31,6 +31,8 @@ local l10n = QuestieLoader:ImportModule("l10n")
 local C_Timer = QuestieCompat.C_Timer
 local C_Map = QuestieCompat.C_Map
 local GetQuestLogTitle = QuestieCompat.GetQuestLogTitle
+local GetQuestLogIndexByID = QuestieCompat.GetQuestLogIndexByID
+local WorldMapFrame = QuestieCompat.WorldMapFrame
 
 local tinsert = table.insert
 
@@ -66,7 +68,7 @@ local bindTruthTable = {
     ['disabled'] = function() return false end,
 }
 
-local _QuestLogScrollBar = QuestLogListScrollFrame.ScrollBar or QuestLogListScrollFrameScrollBar
+local _QuestLogScrollBar = QuestLogScrollFrameScrollBar or QuestLogListScrollFrame.ScrollBar or QuestLogListScrollFrameScrollBar
 
 ---@param quest table The table provided by QuestieDB.GetQuest(questId)
 function TrackerUtils:ShowQuestLog(quest)

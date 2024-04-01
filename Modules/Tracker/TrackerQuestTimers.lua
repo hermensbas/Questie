@@ -13,6 +13,9 @@ local TrackerLinePool = QuestieLoader:ImportModule("TrackerLinePool")
 ---@type QuestieCombatQueue
 local QuestieCombatQueue = QuestieLoader:ImportModule("QuestieCombatQueue")
 
+--- COMPATIBILITY ---
+local GetQuestLogIndexByID = QuestieCompat.GetQuestLogIndexByID
+
 local LSM30 = LibStub("LibSharedMedia-3.0")
 
 local WatchFrame = QuestTimerFrame or WatchFrame

@@ -45,6 +45,8 @@ local QuestieDebugOffer = QuestieLoader:ImportModule("QuestieDebugOffer")
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
 local GetQuestLogTitle = QuestieCompat.GetQuestLogTitle
+local GetQuestLogIndexByID = QuestieCompat.GetQuestLogIndexByID
+local GetItemInfo = QuestieCompat.GetItemInfo
 
 local LSM30 = LibStub("LibSharedMedia-3.0")
 

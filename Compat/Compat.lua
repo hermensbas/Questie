@@ -264,6 +264,9 @@ QuestieCompat.C_QuestLog = {
         end
 		return questObjectives -- can be empty for quests without objectives
 	end,
+    GetMaxNumQuestsCanAccept = function()
+        return MAX_QUESTLOG_QUESTS
+    end,
 }
 
 -- Can't find anything about this function.
@@ -279,6 +282,23 @@ function QuestieCompat.GetQuestLogTitle(questLogIndex)
     local questTitle, level, questTag, suggestedGroup, isHeader, isCollapsed,
         isComplete, isDaily, questID = GetQuestLogTitle(questLogIndex);
     return questTitle, level, suggestedGroup, isHeader, isCollapsed, isComplete, isDaily and 2 or 1, questID
+end
+
+local MAX_QUEST_LOG_INDEX = 75
+-- Returns the current quest log index of a quest by its ID.
+-- https://wowpedia.fandom.com/wiki/API_GetQuestLogIndexByID
+function QuestieCompat.GetQuestLogIndexByID(questId)
+    for questLogIndex = 1, MAX_QUEST_LOG_INDEX do
+        local title, _, _, _, isHeader, _, _, _, id = GetQuestLogTitle(questLogIndex)
+        if (not title) then
+            break -- We exceeded the valid quest log entries
+        end
+        if (not isHeader) then
+            if (questId == id) then
+                return questLogIndex
+            end
+        end
+    end
 end
 
 -- https://wowpedia.fandom.com/wiki/API_GetQuestLogRewardMoney
@@ -328,7 +348,7 @@ end
 -- https://wowpedia.fandom.com/wiki/API_IsQuestFlaggedCompleted
 -- Determine if a quest has been completed.
 function QuestieCompat.IsQuestFlaggedCompleted(questID)
-	return Questie.db.char.complete[questID]
+	return Questie.db.char.complete[questID] or false
 end
 
 local questTagIdToName = {
@@ -470,6 +490,21 @@ function QuestieCompat.GetItemInfo(item)
         itemSubType, itemStackCount,itemEquipLoc, itemTexture, itemSellPrice, itemClass[itemType]
 end
 
+-- Returns info for an item in a container slot.
+-- https://wowpedia.fandom.com/wiki/API_GetContainerItemInfo
+function QuestieCompat.GetContainerItemInfo(bagID, slot)
+	local iconFile, stackCount, isLocked, quality, isReadable, hasLoot, hyperlink = GetContainerItemInfo(bagID, slot)
+    if hyperlink then
+	    local itemID = string.match(hyperlink, "(%-?%d+):(%-?%d+):(%-?%d+):(%-?%d+):(%-?%d+):(%-?%d+):(%-?%d+):(%-?%d+)")
+	    -- GetContainerItemInfo does not return a quality value for all items.  If it does not, it returns -1
+	    if quality and quality < 0 then
+	    	quality = (select(3, GetItemInfo(hyperlink)))
+	    end
+
+	    return iconFile, stackCount, isLocked, quality, isReadable, hasLoot, hyperlink, false, false, tonumber(itemID), false
+    end
+end
+
 -- https://wowpedia.fandom.com/wiki/API_IsSpellKnown
 QuestieCompat.IsSpellKnownOrOverridesKnown = IsSpellKnown
 QuestieCompat.IsPlayerSpell = IsSpellKnown
@@ -527,6 +562,23 @@ local empty_table = {}
 function QuestieCompat.TextWrap(self, line, prefix, combineTrailing, desiredWidth)
     QuestieCompat.Tooltip:AddLine(line, 0.86, 0.86, 0.86, 1);
     return empty_table
+end
+
+local fontString = UIParent:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+fontString:Hide()
+-- The minimum width necessary to contain the entire text without truncation
+-- https://wowpedia.fandom.com/wiki/API_FontString_GetStringWidth
+function QuestieCompat.GetUnboundedStringWidth(self)
+    fontString:SetFont(self:GetFont())
+    fontString:SetText(self:GetText())
+
+    return fontString:GetStringWidth()
+end
+
+-- ???
+-- https://wowpedia.fandom.com/wiki/API_FontString_GetNumLines
+function QuestieCompat.GetNumLines(self)
+    return 1
 end
 
 QuestieCompat.LibUIDropDownMenu = {
@@ -651,10 +703,34 @@ function QuestieCompat.QuestEventHandler_RegisterEvents(_QuestEventHandler)
         _QuestEventHandler:QuestRemoved(questId)
     end)
 
-    hooksecurefunc("AbandonQuest", function()
-        local questId = select(9, GetQuestLogTitle(GetQuestLogSelection()))
-        _QuestEventHandler:QuestRemoved(questId)
+    hooksecurefunc("SetAbandonQuest", function()
+        QuestieCompat.abandonQuestID = select(9, GetQuestLogTitle(GetQuestLogSelection()))
     end)
+
+    hooksecurefunc("AbandonQuest", function()
+        local questId = QuestieCompat.abandonQuestID or select(9, GetQuestLogTitle(GetQuestLogSelection()))
+        _QuestEventHandler:QuestRemoved(QuestieCompat.abandonQuestID)
+    end)
+end
+
+function QuestieCompat.QuestieTracker_Initialize(trackerQuestFrame)
+    -- TrackerHeaderFrame.Initialize
+    Questie_HeaderFrame.trackedQuests.label.GetUnboundedStringWidth = QuestieCompat.GetUnboundedStringWidth
+    -- TrackerQuestFrame.Initialize
+    trackerQuestFrame.ScrollFrame.scrollBarHideable = true
+    trackerQuestFrame.ScrollBar:ClearAllPoints()
+    trackerQuestFrame.ScrollBar:SetPoint("TOPRIGHT", trackerQuestFrame.ScrollUpButton, "BOTTOMRIGHT", -1, 4)
+    trackerQuestFrame.ScrollBar:SetPoint("BOTTOMRIGHT", trackerQuestFrame.ScrollDownButton, "TOPRIGHT", -1, -4)
+    trackerQuestFrame.ScrollDownButton:SetPoint("BOTTOMRIGHT", trackerQuestFrame.ScrollFrame, "BOTTOMRIGHT", -4, 12)
+    trackerQuestFrame.ScrollBg:SetTexture(0, 0, 0, 0.35)
+    trackerQuestFrame.ScrollBg:Show()
+    trackerQuestFrame.ScrollBar.Show = function() end
+    -- TrackerLinePool.Initialize
+    for i = 1, 250 do
+        local line = _G["linePool" .. i]
+        line.label.GetUnboundedStringWidth = QuestieCompat.GetUnboundedStringWidth
+        line.label.GetNumLines = QuestieCompat.GetNumLines
+    end
 end
 
 -- prevents the override of existing global variables with the same name(e.g., WorldMapButton)
@@ -707,6 +783,7 @@ function QuestieCompat:ADDON_LOADED(event, addon)
             QuestieCompat.QuestEventHandler_RegisterEvents(QuestEventHandler.private)
         end)
 
-        Questie.db.profile.trackerEnabled = false
+        local TrackerLinePool = QuestieLoader:ImportModule("TrackerLinePool")
+        hooksecurefunc(TrackerLinePool, "Initialize", QuestieCompat.QuestieTracker_Initialize)
     end
 end

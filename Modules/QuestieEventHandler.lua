@@ -143,9 +143,12 @@ function QuestieEventHandler:RegisterLateEvents()
 
         -- Timed based Achievement updates
         -- TODO: Fired when a timed event for an achievement begins or ends. The achievement does not have to be actively tracked for this to trigger.
-        Questie:RegisterEvent("TRACKED_ACHIEVEMENT_UPDATE", function()
+        Questie:RegisterEvent("TRACKED_ACHIEVEMENT_UPDATE", function(self, achieveId)
             Questie:Debug(Questie.DEBUG_DEVELOP, "[EVENT] TRACKED_ACHIEVEMENT_UPDATE")
             QuestieCombatQueue:Queue(function()
+                if QuestieCompat.Is335 then
+                    QuestieTracker:UpdateAchieveTrackerCache(achieveId)
+                end
                 QuestieTracker:Update()
             end)
         end)
