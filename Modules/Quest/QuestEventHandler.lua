@@ -282,6 +282,8 @@ function _QuestEventHandler:QuestTurnedIn(questId, xpReward, moneyReward)
         -- There are quests which you just turn in so there is no preceding QUEST_ACCEPTED event and questLog[questId]
         -- is empty
         questLog[questId].state = QUEST_LOG_STATES.QUEST_TURNED_IN
+    elseif QuestieCompat.Is335 then
+        questLog[questId] = {state = QUEST_LOG_STATES.QUEST_TURNED_IN}
     end
 
     local parentQuest = QuestieDB.QueryQuestSingle(questId, "parentQuest")

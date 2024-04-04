@@ -24,6 +24,7 @@ local QuestLogCache = QuestieLoader:ImportModule("QuestLogCache")
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
 local C_Map = QuestieCompat.C_Map
+local UnitInParty = QuestieCompat.UnitInParty
 local IsInRaid = QuestieCompat.IsInRaid
 
 local HBD = QuestieCompat.HBD or LibStub("HereBeDragonsQuestie-2.0")

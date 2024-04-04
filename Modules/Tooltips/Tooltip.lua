@@ -16,6 +16,7 @@ local QuestieDB = QuestieLoader:ImportModule("QuestieDB");
 local l10n = QuestieLoader:ImportModule("l10n")
 
 --- COMPATIBILITY ---
+local UnitInParty = QuestieCompat.UnitInParty
 local IsInGroup = QuestieCompat.IsInGroup
 local GetClassColor = QuestieCompat.GetClassColor
 

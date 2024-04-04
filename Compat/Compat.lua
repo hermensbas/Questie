@@ -1,3 +1,24 @@
+---@type QuestieLib
+local QuestieLib = QuestieLoader:ImportModule("QuestieLib")
+---@type QuestieStream
+local QuestieStream = QuestieLoader:ImportModule("QuestieStreamLib")
+---@type QuestieDB
+local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
+---@type QuestieEventHandler
+local QuestieEventHandler = QuestieLoader:ImportModule("QuestieEventHandler")
+---@type QuestEventHandler
+local QuestEventHandler = QuestieLoader:ImportModule("QuestEventHandler")
+---@type ZoneDB
+local ZoneDB = QuestieLoader:ImportModule("ZoneDB")
+---@type MinimapIcon
+local MinimapIcon = QuestieLoader:ImportModule("MinimapIcon")
+---@type TrackerLinePool
+local TrackerLinePool = QuestieLoader:ImportModule("TrackerLinePool")
+---@type QuestiePlayer
+local QuestiePlayer = QuestieLoader:ImportModule("QuestiePlayer")
+---@type QuestXP
+local QuestXP = QuestieLoader:ImportModule("QuestXP")
+
 -- addon/folder name
 QuestieCompat.addonName = "Questie-335"
 
@@ -301,6 +322,10 @@ function QuestieCompat.GetQuestLogIndexByID(questId)
     end
 end
 
+function QuestieCompat.GetQuestIDFromLogIndex(questLogIndex)
+    return select(9, GetQuestLogTitle(questLogIndex))
+end
+
 -- https://wowpedia.fandom.com/wiki/API_GetQuestLogRewardMoney
 -- Returns the amount of money rewarded for a quest.
 function QuestieCompat.GetQuestLogRewardMoney(questID)
@@ -311,7 +336,6 @@ function QuestieCompat.GetQuestLogRewardMoney(questID)
         return rewardMoney
     end
 
-    local QuestiePlayer = QuestieLoader:ImportModule("QuestiePlayer")
     local playerLevel = QuestiePlayer.GetPlayerLevel()
     if playerLevel > 0 and rewardMoneyDifficulty > 0 then
         rewardMoney = QuestieCompat.QuestMoneyReward[playerLevel][rewardMoneyDifficulty]
@@ -319,7 +343,6 @@ function QuestieCompat.GetQuestLogRewardMoney(questID)
 
     -- https://wowpedia.fandom.com/wiki/Quest?oldid=1035002 Formula is XP gained * 6c
     if QuestiePlayer.IsMaxLevel() then
-        local QuestXP = QuestieLoader:ImportModule("QuestXP")
         local xpReward = QuestXP:GetQuestLogRewardXP(questID, true)
         if xpReward > 0 then
             rewardMoney = rewardMoney + xpReward*6
@@ -412,6 +435,16 @@ function QuestieCompat.GetFactionInfo(factionIndex)
         canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, QuestieCompat.FactionId[name:trim()]
 end
 
+-- Returns true if the unit is a member of your party
+-- https://wowpedia.fandom.com/wiki/API_UnitInParty
+-- As of 2.0.3, UnitInParty("player") always returns 1, even when you are not in a party.
+function QuestieCompat.UnitInParty(unit)
+    if unit == "player" then
+        return QuestieCompat.IsInGroup()
+    end
+    return UnitInParty(unit)
+end
+
 -- Returns true if the player is in a group.
 -- https://wowpedia.fandom.com/wiki/API_IsInGroup
 function QuestieCompat.IsInGroup(groupType)
@@ -429,7 +462,7 @@ end
 -- Returns names of characters in your home (non-instance) party.
 -- https://wowpedia.fandom.com/wiki/API_GetHomePartyInfo
 function QuestieCompat.GetHomePartyInfo(homePlayers)
-	if UnitInParty("player") then
+	if QuestieCompat.UnitInParty("player") then
 		homePlayers = homePlayers or {}
 		for i=1, MAX_PARTY_MEMBERS do
 			if GetPartyMember(i) then
@@ -467,8 +500,11 @@ end
 -- Returns the ID of the displayed quest at a quest giver.
 -- https://wowpedia.fandom.com/wiki/API_GetQuestID
 function QuestieCompat.GetQuestID(questStarter)
-	local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
-	return QuestieDB.GetQuestIDFromName(GetTitleText(), QuestieCompat.UnitGUID("target"), questStarter)
+    local questID = QuestieDB.GetQuestIDFromName(GetTitleText(), QuestieCompat.UnitGUID("target"), questStarter)
+    if questID == 0 then
+        return QuestieDB.GetQuestIDFromName(GetTitleText(), QuestieCompat.UnitGUID("target"), not questStarter)
+    end
+	return questID
 end
 
 -- Gets a list of the auction house item classes.
@@ -682,7 +718,69 @@ function QuestieCompat.Save(self)
 	return result
 end
 
-function QuestieCompat.QuestEventHandler_RegisterEvents(_QuestEventHandler)
+local chatMessagePattern = {
+    questInfo = {
+        ERR_QUEST_OBJECTIVE_COMPLETE_S,
+	    ERR_QUEST_UNKNOWN_COMPLETE,
+	    ERR_QUEST_ADD_KILL_SII,
+	    ERR_QUEST_ADD_FOUND_SII,
+	    ERR_QUEST_ADD_ITEM_SII,
+	    ERR_QUEST_ADD_PLAYER_KILL_SII,
+	    ERR_QUEST_FAILED_S,
+    },
+    playerLoot = {
+        LOOT_ITEM_CREATED_SELF,
+        LOOT_ITEM_CREATED_SELF_MULTIPLE,
+        LOOT_ITEM_PUSHED_SELF,
+        LOOT_ITEM_PUSHED_SELF_MULTIPLE,
+        LOOT_ITEM_SELF,
+        LOOT_ITEM_SELF_MULTIPLE,
+    }
+}
+
+function QuestieCompat.UiInfoMessage(event, message)
+    for _, pattern in pairs(chatMessagePattern.questInfo) do
+        if string.find(message, pattern) then
+            MinimapIcon:UpdateText(message)
+        end
+    end
+end
+
+local playerName = UnitName("player")
+function QuestieCompat.ChatMessageLoot(message)
+    for _, pattern in pairs(chatMessagePattern.playerLoot) do
+        if string.find(message, pattern) then
+            return playerName
+        end
+    end
+end
+
+function QuestieCompat.GroupRosterUpdate(event)
+    local currentMembers = QuestieCompat.IsInRaid() and GetNumRaidMembers() or GetNumPartyMembers()
+    -- Only want to do logic when number increases, not decreases.
+    if QuestiePlayer.numberOfGroupMembers < currentMembers then
+        if QuestiePlayer.numberOfGroupMembers == 0 then
+            QuestieEventHandler.private:GroupJoined()
+        end
+        -- Tell comms to send information to members.
+        --Questie:SendMessage("QC_ID_BROADCAST_FULL_QUESTLIST")
+        QuestiePlayer.numberOfGroupMembers = currentMembers
+    else
+        if currentMembers == 0 then
+            QuestieEventHandler.private:GroupLeft()
+        end
+        -- We do however always want the local to be the current number to allow up and down.
+        QuestiePlayer.numberOfGroupMembers = currentMembers
+    end
+end
+
+function QuestieCompat.QuestieEventHandler_RegisterLateEvents()
+    Questie:RegisterEvent("PARTY_MEMBERS_CHANGED", QuestieCompat.GroupRosterUpdate)
+    Questie:RegisterBucketEvent("RAID_ROSTER_UPDATE", 1, QuestieCompat.GroupRosterUpdate)
+end
+
+function QuestieCompat.QuestEventHandler_RegisterEvents()
+    local _QuestEventHandler = QuestEventHandler.private
     for _, event in pairs({
         "TRADE_CLOSED",
         "MERCHANT_CLOSED",
@@ -750,8 +848,6 @@ function QuestieCompat:ADDON_LOADED(event, addon)
             "SeasonOfDiscovery",
             "QuestieDBMIntegration",
             "QuestieNameplate",
-            "QuestieAnnounce",
-            "QuestieComms",
             "QuestieAuto",
             "QuestgiverFrame",
         }) do
@@ -759,31 +855,25 @@ function QuestieCompat:ADDON_LOADED(event, addon)
             setmetatable(module, QuestieCompat.NOOP_MT)
         end
 
-        QuestieLoader.PopulateGlobals = QuestieCompat.PopulateGlobals
-
-        local ZoneDB = QuestieLoader:ImportModule("ZoneDB")
-        ZoneDB.private.RunTests = QuestieCompat.NOOP
-
-        local QuestieLib = QuestieLoader:ImportModule("QuestieLib")
-        QuestieLib.TextWrap = QuestieCompat.TextWrap
-
-        local QuestieComms = QuestieLoader:ImportModule("QuestieComms")
-        QuestieComms.remotePlayerEnabled = {}
-
         local QuestieMap = QuestieLoader:ImportModule("QuestieMap")
         QuestieMap.DrawWaypoints = QuestieCompat.NOOP
 
-        local QuestieStream = QuestieLoader:ImportModule("QuestieStreamLib")
+        QuestieLoader.PopulateGlobals = QuestieCompat.PopulateGlobals
         QuestieStream._writeByte = QuestieCompat._writeByte
         QuestieStream._readByte = QuestieCompat._readByte
         QuestieStream.Save = QuestieCompat.Save
+        ZoneDB.private.RunTests = QuestieCompat.NOOP
+        QuestieLib.TextWrap = QuestieCompat.TextWrap
+        QuestieEventHandler.private.UiInfoMessage = QuestieCompat.UiInfoMessage
 
-        local QuestEventHandler = QuestieLoader:ImportModule("QuestEventHandler")
-        hooksecurefunc(QuestEventHandler, "RegisterEvents", function()
-            QuestieCompat.QuestEventHandler_RegisterEvents(QuestEventHandler.private)
-        end)
+        for k, patterns in pairs(chatMessagePattern) do
+            for i, str in pairs(patterns) do
+                chatMessagePattern[k][i] = QuestieLib:SanitizePattern(str)
+            end
+        end
 
-        local TrackerLinePool = QuestieLoader:ImportModule("TrackerLinePool")
+        hooksecurefunc(QuestieEventHandler, "RegisterLateEvents", QuestieCompat.QuestieEventHandler_RegisterLateEvents)
+        hooksecurefunc(QuestEventHandler, "RegisterEvents", QuestieCompat.QuestEventHandler_RegisterEvents)
         hooksecurefunc(TrackerLinePool, "Initialize", QuestieCompat.QuestieTracker_Initialize)
     end
 end

@@ -14,15 +14,15 @@
 ## X-Curse-Project-ID: 334372
 ## X-Wago-ID: qv634BKb
 
+# Loader module
+Modules\Libs\QuestieLoader.lua
+
 Modules\QuestieCompat.lua
 #Modules\WorldMapTaintWorkaround.lua
 
 Compat\embeds.xml
 
 Modules\VersionCheck.lua
-
-# Loader module
-Modules\Libs\QuestieLoader.lua
 
 #Libs\LibUIDropDownMenu\LibUIDropDownMenu.xml
 #Libs\HereBeDragons\HereBeDragons-2.0.lua
@@ -118,7 +118,7 @@ Modules\QuestieReputation.lua
 Modules\QuestieEventHandler.lua
 Modules\Migration.lua
 Modules\QuestieMenu.lua
-#Modules\QuestieAnnounce.lua
+Modules\QuestieAnnounce.lua
 Modules\QuestieShutUp.lua
 Modules\Sounds.lua
 Modules\TaskQueue.lua
@@ -128,9 +128,9 @@ Modules\QuestiePlayer.lua
 #Modules\WorldMapButton\QuestieWorldMapButtonTemplate.xml
 
 # QuestLinks
-#Modules\QuestLinks\ChatFilter.lua
-#Modules\QuestLinks\Hooks.lua
-#Modules\QuestLinks\Link.lua
+Modules\QuestLinks\ChatFilter.lua
+Modules\QuestLinks\Hooks.lua
+Modules\QuestLinks\Link.lua
 
 # Tooltips
 Modules\Tooltips\Tooltip.lua
@@ -166,8 +166,8 @@ Modules\Quest\QuestieQuestPrivates.lua
 #Modules\QuestieCoordinates.lua
 
 # Network
-#Modules\Network\QuestieComms.lua
-#Modules\Network\QuestieCommsData.lua
+Modules\Network\QuestieComms.lua
+Modules\Network\QuestieCommsData.lua
 
 # Journey
 Modules\Journey\QuestieJourney.lua
@@ -201,7 +201,7 @@ Modules\Tutorial\ChooseObjectiveType.lua
 Modules\Tutorial\Tutorial.lua
 
 #Modules\QuestieDBMIntegration.lua
-#Modules\QuestieSlash.lua
+Modules\QuestieSlash.lua
 
 # Options
 Modules\Options\QuestieOptions.lua

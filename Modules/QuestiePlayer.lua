@@ -14,6 +14,7 @@ local l10n = QuestieLoader:ImportModule("l10n")
 local C_Map = QuestieCompat.C_Map
 local UnitRace = QuestieCompat.UnitRace
 local UnitClass = QuestieCompat.UnitClass
+local UnitInParty = QuestieCompat.UnitInParty
 local IsInGroup = QuestieCompat.IsInGroup
 local GetHomePartyInfo = QuestieCompat.GetHomePartyInfo
 local GetClassColor = QuestieCompat.GetClassColor

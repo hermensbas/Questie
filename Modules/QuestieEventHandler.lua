@@ -1,6 +1,6 @@
 ---@class QuestieEventHandler
 local QuestieEventHandler = QuestieLoader:CreateModule("QuestieEventHandler")
-local _EventHandler = {}
+local _EventHandler = QuestieEventHandler.private
 
 -------------------------
 --Import modules.
@@ -48,6 +48,7 @@ local AvailableQuests = QuestieLoader:ImportModule("AvailableQuests")
 
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
+local UnitInParty = QuestieCompat.UnitInParty
 
 local questAcceptedMessage = string.gsub(ERR_QUEST_ACCEPTED_S, "(%%s)", "(.+)")
 local questCompletedMessage = string.gsub(ERR_QUEST_COMPLETE_S, "(%%s)", "(.+)")
@@ -208,6 +209,9 @@ function QuestieEventHandler:RegisterLateEvents()
 
     -- quest announce
     Questie:RegisterEvent("CHAT_MSG_LOOT", function(_, text, notPlayerName, _, _, playerName)
+        if QuestieCompat.Is335 then
+            playerName = QuestieCompat.ChatMessageLoot(text)
+        end
         QuestieTracker.QuestItemLooted(_, text)
         QuestieAnnounce.ItemLooted(_, text, notPlayerName, _, _, playerName)
     end)

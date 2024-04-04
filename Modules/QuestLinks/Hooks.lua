@@ -6,6 +6,8 @@ local Hooks = QuestieLoader:CreateModule("Hooks")
 ---@type QuestieTracker
 local QuestieTracker = QuestieLoader:ImportModule("QuestieTracker")
 
+--- COMPATIBILITY ---
+local GetQuestIDFromLogIndex = QuestieCompat.GetQuestIDFromLogIndex
 
 function Hooks:HookQuestLogTitle()
     Questie:Debug(Questie.DEBUG_DEVELOP, "[Hooks] Hooking Quest Log Title")

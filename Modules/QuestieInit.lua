@@ -270,7 +270,7 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
     QuestieTooltips:Initialize()
     --QuestieCoords:Initialize()
     TrackerQuestTimers:Initialize()
-    --[[QuestieComms:Initialize()
+    QuestieComms:Initialize()
 
     QuestieSlash.RegisterSlashCommands()
 
@@ -278,13 +278,13 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
 
     if Questie.db.profile.dbmHUDEnable then
         QuestieDBMIntegration:EnableHUD()
-    end]]
+    end
     -- ** OLD ** Questie:ContinueInit() ** END **
 
     coYield()
     QuestEventHandler:RegisterEvents()
-    --[[coYield()
-    ChatFilter:RegisterEvents()]]
+    coYield()
+    ChatFilter:RegisterEvents()
     QuestieMap:InitializeQueue()
 
     coYield()
@@ -301,7 +301,7 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
     -- Initialize the tracker
     coYield()
     QuestieTracker.Initialize()
-    --Hooks:HookQuestLogTitle()
+    Hooks:HookQuestLogTitle()
     QuestieCombatQueue.Initialize()
 
     local dateToday = date("%y-%m-%d")

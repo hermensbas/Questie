@@ -1,3 +1,6 @@
+---@type QuestieMap
+local QuestieMap = QuestieLoader:ImportModule("QuestieMap");
+
 local mapData = QuestieCompat.UiMapData -- table { width, height, left, top, .instance, .name, .mapType }
 
 -- data for the azeroth world map
@@ -476,10 +479,10 @@ local Enum = {
 
 local worldmapWidth, worldmapHeight
 
-local function HandleWorldMapPin(icon, data, uiMapId)
+local function HandleWorldMapPin(icon, data)
     if not WorldMapFrame:IsVisible() then return end
 
-    local uiMapID = uiMapId or QuestieCompat.GetCurrentUiMapID()
+    local uiMapID = QuestieCompat.GetCurrentUiMapID()
 
     -- check for a valid map
     if not uiMapID then return end
@@ -560,8 +563,6 @@ local function UpdateMinimap()
     UpdateMinimapPins()
 end
 
-local lastUiMapId = -1;
-local lastScale = WorldMapButton:GetEffectiveScale()
 local function UpdateWorldMap()
     if not WorldMapFrame:IsVisible() then return end
 
@@ -569,16 +570,14 @@ local function UpdateWorldMap()
     worldmapWidth  = WorldMapButton:GetWidth()*scale
     worldmapHeight = WorldMapButton:GetHeight()*scale
 
-    local mapId = QuestieCompat.GetCurrentUiMapID()
-    if(lastUiMapId ~= mapId or lastScale ~= scale) then
-        for icon, data in pairs(worldmapPins) do
-            icon:Hide()
-            icon:ClearAllPoints()
-            HandleWorldMapPin(icon, data, mapId)
-        end
-        --DEFAULT_CHAT_FRAME:AddMessage(mapId .. " - " .. lastUiMapId .. " : " .. tostring(worldmapProvider.forceUpdate));
-        lastUiMapId = mapId;
-        lastScale = scale;
+    local mapScale = QuestieMap.GetScaleValue()
+
+    for icon, data in pairs(worldmapPins) do
+        icon:Hide()
+        icon:ClearAllPoints()
+
+        QuestieMap.utils:RescaleIcon(icon, mapScale)
+        HandleWorldMapPin(icon, data)
     end
 end
 
