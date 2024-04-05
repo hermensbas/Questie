@@ -374,6 +374,43 @@ function QuestieCompat.IsQuestFlaggedCompleted(questID)
 	return Questie.db.char.complete[questID] or false
 end
 
+---Returns the available quests at a quest giver.
+-- https://wowpedia.fandom.com/wiki/API_GetGossipAvailableQuests
+function QuestieCompat.GetAvailableQuests()
+	local availableQuests = {GetGossipAvailableQuests()}
+	local numAvailable = GetNumGossipAvailableQuests()
+	for i = 1, numAvailable do
+		local index = (i - 1) * 5
+		availableQuests[index + 3] = availableQuests[index + 3] and true or false
+		availableQuests[index + 4] = availableQuests[index + 4] and 2 or 1
+		availableQuests[index + 5] = availableQuests[index + 5] and true or false
+	end
+    for i = 1, numAvailable do
+		local index = (i - 1) * 7
+		table.insert(availableQuests, index + 6, false)
+		table.insert(availableQuests, index + 7, false)
+	end
+	return unpack(availableQuests)
+end
+
+-- Returns the quests which can be turned in at a quest giver.
+-- https://wowpedia.fandom.com/wiki/API_GetGossipActiveQuests
+function QuestieCompat.GetActiveQuests()
+	local activeQuests = {GetGossipActiveQuests()}
+	local numActive = GetNumGossipActiveQuests()
+	for i = 1, numActive do
+		local index = (i - 1) * 4
+		activeQuests[index + 3] = activeQuests[index + 3] and true or false
+		activeQuests[index + 4] = activeQuests[index + 4] and true or false
+	end
+    for i = 1, numActive do
+		local index = (i - 1) * 6
+		table.insert(activeQuests, index + 5, false)
+		table.insert(activeQuests, index + 6, false)
+	end
+	return unpack(activeQuests)
+end
+
 local questTagIdToName = {
 	[1] = "Group",
 	[41] = "PvP",
@@ -582,11 +619,7 @@ end
 
 function QuestieCompat.SetupTooltip(frame, OnHide)
     if (frame:GetParent() == WorldMapFrame) then
-        local miniWorldMap = WORLDMAP_SETTINGS.size == WORLDMAP_WINDOWED_SIZE
-        if (not miniWorldMap) then
-            WorldMapFrame:EnableKeyboard(OnHide and true or false)
-        end
-        WorldMapBlobFrame:SetScript("OnUpdate", OnHide and WorldMapBlobFrame_OnUpdate or nil)
+        WorldMapPOIFrame.allowBlobTooltip = OnHide and true or false
         QuestieCompat.Tooltip = WorldMapTooltip
     else
         QuestieCompat.Tooltip = GameTooltip
@@ -718,6 +751,7 @@ function QuestieCompat.Save(self)
 	return result
 end
 
+local _EventHandler = QuestieEventHandler.private
 local chatMessagePattern = {
     questInfo = {
         ERR_QUEST_OBJECTIVE_COMPLETE_S,
@@ -760,14 +794,14 @@ function QuestieCompat.GroupRosterUpdate(event)
     -- Only want to do logic when number increases, not decreases.
     if QuestiePlayer.numberOfGroupMembers < currentMembers then
         if QuestiePlayer.numberOfGroupMembers == 0 then
-            QuestieEventHandler.private:GroupJoined()
+            _EventHandler:GroupJoined()
         end
         -- Tell comms to send information to members.
         --Questie:SendMessage("QC_ID_BROADCAST_FULL_QUESTLIST")
         QuestiePlayer.numberOfGroupMembers = currentMembers
     else
         if currentMembers == 0 then
-            QuestieEventHandler.private:GroupLeft()
+            _EventHandler:GroupLeft()
         end
         -- We do however always want the local to be the current number to allow up and down.
         QuestiePlayer.numberOfGroupMembers = currentMembers
@@ -777,6 +811,22 @@ end
 function QuestieCompat.QuestieEventHandler_RegisterLateEvents()
     Questie:RegisterEvent("PARTY_MEMBERS_CHANGED", QuestieCompat.GroupRosterUpdate)
     Questie:RegisterBucketEvent("RAID_ROSTER_UPDATE", 1, QuestieCompat.GroupRosterUpdate)
+
+    -- In fullscreen mode, WorldMap intercepts keyboard input,
+    -- preventing the MODIFIER_STATE_CHANGED event
+    local modifierStateChanged
+    WorldMapFrame:HookScript("OnKeyDown", function(self, key)
+        if IsModifierKeyDown() then
+            _EventHandler:ModifierStateChanged(key, 1)
+            modifierStateChanged = true
+        end
+    end)
+    WorldMapFrame:HookScript("OnKeyUp", function(self, key)
+        if modifierStateChanged then
+            _EventHandler:ModifierStateChanged(key, 0)
+            modifierStateChanged = nil
+        end
+    end)
 end
 
 function QuestieCompat.QuestEventHandler_RegisterEvents()
@@ -848,8 +898,6 @@ function QuestieCompat:ADDON_LOADED(event, addon)
             "SeasonOfDiscovery",
             "QuestieDBMIntegration",
             "QuestieNameplate",
-            "QuestieAuto",
-            "QuestgiverFrame",
         }) do
             local module = QuestieLoader:ImportModule(moduleName)
             setmetatable(module, QuestieCompat.NOOP_MT)
@@ -864,7 +912,7 @@ function QuestieCompat:ADDON_LOADED(event, addon)
         QuestieStream.Save = QuestieCompat.Save
         ZoneDB.private.RunTests = QuestieCompat.NOOP
         QuestieLib.TextWrap = QuestieCompat.TextWrap
-        QuestieEventHandler.private.UiInfoMessage = QuestieCompat.UiInfoMessage
+        _EventHandler.UiInfoMessage = QuestieCompat.UiInfoMessage
 
         for k, patterns in pairs(chatMessagePattern) do
             for i, str in pairs(patterns) do

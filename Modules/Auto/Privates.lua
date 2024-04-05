@@ -26,7 +26,7 @@ function _QuestieAuto:AcceptQuestFromGossip(index, availableQuests, modulo)
     local isTrivial = availableQuests[index + 2]
     local isRepeatable = availableQuests[index + 4]
 
-    if _QuestieAuto:IsAllowedQuest() and ((not isTrivial) or Questie.db.profile.acceptTrivial) then
+    if _QuestieAuto:IsAllowedQuest(true) and ((not isTrivial) or Questie.db.profile.acceptTrivial) then
         Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieAuto] Checking available quest: \"" .. title .. "\"",
             "isTrivial", isTrivial, "isRepeatable", isRepeatable, "index",
             index)
@@ -73,8 +73,8 @@ function _QuestieAuto:IsAllowedNPC()
     return allowed
 end
 
-function _QuestieAuto:IsAllowedQuest()
-    local questId = GetQuestID()
+function _QuestieAuto:IsAllowedQuest(questStarter)
+    local questId = GetQuestID(questStarter)
     local allowed = true
     if questId > 0 then
         if (_QuestieAuto.disallowedQuests[questId] ~= nil) then

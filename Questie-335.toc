@@ -138,9 +138,9 @@ Modules\Tooltips\MapIconTooltip.lua
 Modules\Tooltips\TooltipHandler.lua
 
 # Auto
-#Modules\Auto\QuestieAuto.lua
-#Modules\Auto\Privates.lua
-#Modules\Auto\DisallowedIDs.lua
+Modules\Auto\QuestieAuto.lua
+Modules\Auto\Privates.lua
+Modules\Auto\DisallowedIDs.lua
 
 # FramePool
 Modules\FramePool\QuestieFramePool.lua
@@ -158,7 +158,7 @@ Modules\Quest\QuestLogCache.lua
 Modules\Quest\DailyQuests.lua
 Modules\Quest\IsleOfQuelDanas.lua
 Modules\Quest\QuestEventHandler.lua
-#Modules\Quest\QuestgiverFrame.lua
+Modules\Quest\QuestgiverFrame.lua
 Modules\Quest\QuestieQuest.lua
 Modules\Quest\QuestieQuestPrivates.lua
 

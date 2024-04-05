@@ -187,10 +187,10 @@ function QuestieAuto:QUEST_DETAIL(event, ...)
     end
 
     -- We really want to disable this in instances, mostly to prevent retards from ruining groups.
-    if (Questie.db.profile.autoaccept and _QuestieAuto:IsAllowedNPC() and _QuestieAuto:IsAllowedQuest()) then
+    if (Questie.db.profile.autoaccept and _QuestieAuto:IsAllowedNPC() and _QuestieAuto:IsAllowedQuest(true)) then
         Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieAuto] INSIDE", event, ...)
 
-        local questId = GetQuestID()
+        local questId = GetQuestID(true)
         local questLevel
 
         if questId and questId ~= 0 then
@@ -200,7 +200,7 @@ function QuestieAuto:QUEST_DETAIL(event, ...)
         if not questLevel then
             Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieAuto] No quest object, retrying in 1 second")
             C_Timer.After(1, function()
-                questId = GetQuestID()
+                questId = GetQuestID(true)
                 if questId and questId ~= 0 then
                     questLevel = QuestieDB.QueryQuestSingle(questId, "questLevel")
                     if not questLevel then
