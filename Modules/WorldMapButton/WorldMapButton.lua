@@ -11,7 +11,7 @@ local QuestieQuest = QuestieLoader:ImportModule("QuestieQuest")
 ---@type QuestieMenu
 local QuestieMenu = QuestieLoader:ImportModule("QuestieMenu")
 
-local KButtons = LibStub("Krowi_WorldMapButtons-1.4")
+local KButtons = QuestieCompat.KButtons or LibStub("Krowi_WorldMapButtons-1.4")
 
 local mapButton
 
@@ -45,6 +45,7 @@ QuestieWorldMapButtonMixin = {
     end,
     OnMouseUp = function() end,
     OnEnter = function(self)
+        local GameTooltip = QuestieCompat.SetupTooltip(self)
         GameTooltip:SetOwner(self, "ANCHOR_NONE");
         GameTooltip:SetPoint("TOPRIGHT", self, "BOTTOMRIGHT", 0, 0);
         GameTooltip:AddLine("Questie ".. QuestieLib:GetAddonVersionString(), 1, 1, 1)

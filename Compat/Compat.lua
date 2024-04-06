@@ -18,6 +18,8 @@ local TrackerLinePool = QuestieLoader:ImportModule("TrackerLinePool")
 local QuestiePlayer = QuestieLoader:ImportModule("QuestiePlayer")
 ---@type QuestXP
 local QuestXP = QuestieLoader:ImportModule("QuestXP")
+---@class QuestieCoords
+local QuestieCoords = QuestieLoader:ImportModule("QuestieCoords")
 
 -- addon/folder name
 QuestieCompat.addonName = "Questie-335"
@@ -182,7 +184,7 @@ function QuestieCompat.GetCurrentPlayerPosition()
 		if ( WorldMapFrame:IsVisible() ) then
 			-- we know there is a visible world map, so don't cause
 			-- WORLD_MAP_UPDATE events by changing map zoom
-			return;
+			return QuestieCompat.GetCurrentUiMapID(), x, y;
 		end
 		SetMapToCurrentZone();
 		x, y = GetPlayerMapPosition("player");
@@ -198,11 +200,17 @@ function QuestieCompat.GetCurrentPlayerPosition()
 			x, y = GetPlayerMapPosition("player");
 			if ( x <= 0 and y <= 0 ) then
 				-- we are in an instance without a map or otherwise off map
-				return;
+				return QuestieCompat.GetCurrentUiMapID(), x, y;
 			end
 		end
 	end
 	return QuestieCompat.GetCurrentUiMapID(), x, y;
+end
+
+local playerPos = {}
+function QuestieCompat.GetPlayerMapPosition()
+    playerPos.uiMapID, playerPos.x, playerPos.y = QuestieCompat.GetCurrentPlayerPosition()
+    return playerPos
 end
 
 QuestieCompat.C_Map = {
@@ -231,6 +239,34 @@ QuestieCompat.C_Map = {
         local x, y, instanceID = QuestieCompat.HBD:GetWorldCoordinatesFromZone(mapPos.x, mapPos.y, uiMapID)
         return instanceID, {x = x, y = y}
 	end,
+}
+
+QuestieCompat.WorldMapFrame = {
+    IsVisible = function(self)
+        return WorldMapFrame:IsVisible()
+    end,
+    IsShown = function(self)
+        return WorldMapFrame:IsShown()
+    end,
+    Show = function(self)
+        ShowUIPanel(WorldMapFrame)
+    end,
+    GetCanvas = function(self)
+        return WorldMapButton
+    end,
+    GetMapID = QuestieCompat.GetCurrentUiMapID,
+    SetMapID = function(self, UiMapID)
+        local mapID = QuestieCompat.UiMapData[UiMapID].mapID
+        local mapLevel = QuestieCompat.Round(mapID%1 * 10)
+
+        SetMapByID(math.floor(mapID) - 1)
+        if mapLevel > 0 then
+            SetDungeonMapLevel(mapLevel)
+        end
+    end,
+    EnumeratePinsByTemplate = function(self, template)
+        return pairs(QuestieCompat.HBDPins.worldmapPins)
+    end,
 }
 
 QuestieCompat.C_Calendar = {
@@ -662,6 +698,37 @@ QuestieCompat.LibUIDropDownMenu = {
     end,
 }
 
+QuestieCompat.KButtons = {
+    Add = function(self, templateName, templateType)
+        local button = CreateFrame("Button", "Questie_WorldMapButton", WorldMapFrame)
+        button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
+        button:SetPoint("TOPRIGHT", WorldMapButton, "TOPRIGHT", -4, -2);
+        button:SetFrameLevel(99)
+        button:SetSize(32, 32)
+        button:RegisterForClicks("anyUp")
+        button:SetScript("OnMouseDown", QuestieWorldMapButtonMixin.OnMouseDown)
+        button:SetScript("OnEnter", QuestieWorldMapButtonMixin.OnEnter)
+        button:SetScript("OnLeave", function(self) QuestieCompat.SetupTooltip(self, true):Hide() end)
+
+        local background = button:CreateTexture(nil, "BACKGROUND")
+        background:SetSize(25, 25)
+        background:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
+        background:SetPoint("TOPLEFT", 2, -4)
+
+        local icon = button:CreateTexture(nil, "ARTWORK")
+        icon:SetSize(20, 20)
+        icon:SetTexture(QuestieLib.AddonPath.."Icons\\complete.blp")
+        icon:SetPoint("TOPLEFT", 6, -5)
+
+        local border = button:CreateTexture(nil, "OVERLAY")
+        border:SetSize(54, 54)
+        border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
+        border:SetPoint("TOPLEFT")
+
+        return button
+    end,
+}
+
 --[[
     xpcall wrapper implementation
 ]]
@@ -912,6 +979,8 @@ function QuestieCompat:ADDON_LOADED(event, addon)
         QuestieStream.Save = QuestieCompat.Save
         ZoneDB.private.RunTests = QuestieCompat.NOOP
         QuestieLib.TextWrap = QuestieCompat.TextWrap
+        QuestieCoords.GetPlayerMapPosition = QuestieCompat.GetPlayerMapPosition
+        QuestieCoords.ResetMiniWorldMapText = QuestieCompat.NOOP
         _EventHandler.UiInfoMessage = QuestieCompat.UiInfoMessage
 
         for k, patterns in pairs(chatMessagePattern) do

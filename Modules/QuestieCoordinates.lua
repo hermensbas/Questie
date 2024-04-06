@@ -7,6 +7,7 @@ local l10n = QuestieLoader:ImportModule("l10n")
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
 local C_Map = QuestieCompat.C_Map
+local WorldMapFrame = QuestieCompat.WorldMapFrame
 
 local posX = 0;
 local posY = 0;
@@ -23,6 +24,7 @@ local format = format;
 
 
 local function GetMapTitleText()
+    if QuestieCompat.Is335 then return WorldMapFrameTitle end
     local regions = {WorldMapFrame.BorderFrame:GetRegions()}
     for i = 1, #regions do
         if (regions[i].SetText) then
@@ -32,6 +34,7 @@ local function GetMapTitleText()
 end
 
 local function GetMiniWorldMapTitleText()
+    if QuestieCompat.Is335 then return end
     local regions = {WorldMapFrame.MiniBorderFrame:GetRegions()}
     for i = 1, #regions do
         if regions[i].SetText then

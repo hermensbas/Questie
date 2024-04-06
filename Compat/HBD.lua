@@ -156,29 +156,6 @@ local minimapPinRegistry = {}
 local worldmapPins = {}
 local worldmapPinRegistry = {}
 
-
-QuestieCompat.WorldMapFrame = {
-    IsShown = function(self)
-        return WorldMapFrame:IsShown()
-    end,
-    Show = function(self)
-        ShowUIPanel(WorldMapFrame)
-    end,
-    GetMapID = QuestieCompat.GetCurrentUiMapID,
-    SetMapID = function(self, UiMapID)
-        local mapID = mapData[UiMapID].mapID
-        local mapLevel = QuestieCompat.Round(mapID%1 * 10)
-
-        SetMapByID(math.floor(mapID) - 1)
-        if mapLevel > 0 then
-            SetDungeonMapLevel(mapLevel)
-        end
-    end,
-    EnumeratePinsByTemplate = function(self, template)
-        return pairs(worldmapPins)
-    end,
-}
-
 local pins = {
     Minimap = Minimap,
     updateFrame = CreateFrame("Frame"),
@@ -566,7 +543,7 @@ end
 local function UpdateWorldMap()
     if not WorldMapFrame:IsVisible() then return end
 
-    local scale = WorldMapButton:GetEffectiveScale()
+    local scale = WorldMapButton:GetScale()
     worldmapWidth  = WorldMapButton:GetWidth()*scale
     worldmapHeight = WorldMapButton:GetHeight()*scale
 

@@ -268,7 +268,7 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
 
     -- ** OLD ** Questie:ContinueInit() ** START **
     QuestieTooltips:Initialize()
-    --QuestieCoords:Initialize()
+    QuestieCoords:Initialize()
     TrackerQuestTimers:Initialize()
     QuestieComms:Initialize()
 
@@ -289,8 +289,8 @@ QuestieInit.Stages[3] = function() -- run as a coroutine
 
     coYield()
     QuestieQuest:Initialize()
-    --coYield()
-    --WorldMapButton.Initialize()
+    coYield()
+    WorldMapButton.Initialize()
     coYield()
     QuestieQuest:GetAllQuestIdsNoObjectives()
     coYield()
