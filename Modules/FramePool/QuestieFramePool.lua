@@ -16,6 +16,7 @@ local l10n = QuestieLoader:ImportModule("l10n")
 
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
+local WorldMapFrame = QuestieCompat.WorldMapFrame
 
 local HBDPins = QuestieCompat.HBDPins or LibStub("HereBeDragonsQuestie-Pins-2.0")
 
@@ -229,8 +230,10 @@ function QuestieFramePool:CreateLine(iconFrame, startX, startY, endX, endY, line
     --Setting the parent is required to get the correct frame levels.
 
     lineFrame:SetParent(canvas) --This fixes the pan and zoom for lines
-    lineFrame:SetFrameLevel(2015) -- This needs to be high, because of the regular WorldMapFrame.ScrollContainer
-    lineFrame:SetFrameStrata("FULLSCREEN")
+    if not QuestieCompat.Is335 then
+        lineFrame:SetFrameLevel(2015) -- This needs to be high, because of the regular WorldMapFrame.ScrollContainer
+        lineFrame:SetFrameStrata("FULLSCREEN")
+    end
 
     --How to identify what the frame actually contains, this is not used atm could easily be changed.
     lineFrame.type = "line"
@@ -261,7 +264,7 @@ function QuestieFramePool:CreateLine(iconFrame, startX, startY, endX, endY, line
         HBDPins:RemoveWorldMapIcon(Questie, self)
         tinsert(QuestieFramePool.Routes_Lines, self);
     end
-    local line = lineFrame.line or lineFrame:CreateLine();
+    local line = lineFrame.line or (QuestieCompat.Is335 and QuestieCompat.CreateLine(lineFrame) or lineFrame:CreateLine());
     lineFrame.line = line;
 
     line.dR = color[1];
@@ -270,7 +273,7 @@ function QuestieFramePool:CreateLine(iconFrame, startX, startY, endX, endY, line
     line.dA = color[4];
     line:SetColorTexture(color[1],color[2],color[3],color[4]);
 
-    local lineBorder = lineFrame.lineBorder or lineFrame:CreateLine();
+    local lineBorder = lineFrame.lineBorder or (QuestieCompat.Is335 and QuestieCompat.CreateLine(lineFrame, true) or lineFrame:CreateLine());
     lineFrame.lineBorder = lineBorder;
 
     lineBorder.dR = color[1];

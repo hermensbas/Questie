@@ -6,6 +6,8 @@ local QuestieStream = QuestieLoader:ImportModule("QuestieStreamLib")
 local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
 ---@type QuestieEventHandler
 local QuestieEventHandler = QuestieLoader:ImportModule("QuestieEventHandler")
+---@type QuestieQuest
+local QuestieQuest = QuestieLoader:ImportModule("QuestieQuest")
 ---@type QuestEventHandler
 local QuestEventHandler = QuestieLoader:ImportModule("QuestEventHandler")
 ---@type ZoneDB
@@ -309,14 +311,16 @@ QuestieCompat.C_QuestLog = {
 		    for i = 1, numObjectives do
 		    	-- https://wowpedia.fandom.com/wiki/API_GetQuestLogLeaderBoard
 		    	local description, objectiveType, isCompleted = GetQuestLogLeaderBoard(i, questLogIndex);
-		    	local objectiveName, numFulfilled, numRequired = string.match(description, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
-		    	table.insert(questObjectives, {
-		    		text = description,
-		    		type = objectiveType,
-		    		finished = isCompleted and true or false,
-		    		numFulfilled = tonumber(numFulfilled),
-		    		numRequired = tonumber(numRequired),
-		    	})
+                if objectiveType ~= "log" then
+		    	    local objectiveName, numFulfilled, numRequired = string.match(description, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
+		    	    table.insert(questObjectives, {
+		    	    	text = description,
+		    	    	type = objectiveType,
+		    	    	finished = isCompleted and true or false,
+		    	    	numFulfilled = tonumber(numFulfilled),
+		    	    	numRequired = tonumber(numRequired),
+		    	    })
+                end
 		    end
         end
 		return questObjectives -- can be empty for quests without objectives
@@ -572,10 +576,11 @@ end
 
 -- Returns the ID of the displayed quest at a quest giver.
 -- https://wowpedia.fandom.com/wiki/API_GetQuestID
-function QuestieCompat.GetQuestID(questStarter)
-    local questID = QuestieDB.GetQuestIDFromName(GetTitleText(), QuestieCompat.UnitGUID("target"), questStarter)
+function QuestieCompat.GetQuestID(questStarter, title)
+    local title = title or GetTitleText()
+    local questID = QuestieDB.GetQuestIDFromName(title, QuestieCompat.UnitGUID("target"), questStarter)
     if questID == 0 then
-        return QuestieDB.GetQuestIDFromName(GetTitleText(), QuestieCompat.UnitGUID("target"), not questStarter)
+        return QuestieDB.GetQuestIDFromName(title, QuestieCompat.UnitGUID("target"), not questStarter)
     end
 	return questID
 end
@@ -684,6 +689,116 @@ end
 -- https://wowpedia.fandom.com/wiki/API_FontString_GetNumLines
 function QuestieCompat.GetNumLines(self)
     return 1
+end
+
+local function DrawLine(texture, canvasFrame, startX, startY, endX, endY, lineWidth, lineFactor, relPoint)
+	if (not relPoint) then relPoint = "BOTTOMLEFT"; end
+	lineFactor = lineFactor * .5;
+
+	-- Determine dimensions and center point of line
+	local dx,dy = endX - startX, endY - startY;
+	local cx,cy = (startX + endX) / 2, (startY + endY) / 2;
+
+	-- Normalize direction if necessary
+	if (dx < 0) then
+		dx,dy = -dx,-dy;
+	end
+
+	-- Calculate actual length of line
+	local lineLength = sqrt((dx * dx) + (dy * dy));
+
+	-- Quick escape if it'sin zero length
+	if (lineLength == 0) then
+        texture:ClearAllPoints();
+		texture:SetTexCoord(0,0,0,0,0,0,0,0);
+		texture:SetPoint("BOTTOMLEFT", canvasFrame, relPoint, cx,cy);
+		texture:SetPoint("TOPRIGHT",   canvasFrame, relPoint, cx,cy);
+		return;
+	end
+
+	-- Sin and Cosine of rotation, and combination (for later)
+	local sin, cos = -dy / lineLength, dx / lineLength;
+	local sinCos = sin * cos;
+
+	-- Calculate bounding box size and texture coordinates
+	local boundingWidth, boundingHeight, bottomLeftX, bottomLeftY, topLeftX, topLeftY, topRightX, topRightY, bottomRightX, bottomRightY;
+	if (dy >= 0) then
+		boundingWidth = ((lineLength * cos) - (lineWidth * sin)) * lineFactor;
+		boundingHeight = ((lineWidth * cos) - (lineLength * sin)) * lineFactor;
+
+		bottomLeftX = (lineWidth / lineLength) * sinCos;
+		bottomLeftY = sin * sin;
+		bottomRightY = (lineLength / lineWidth) * sinCos;
+		bottomRightX = 1 - bottomLeftY;
+
+		topLeftX = bottomLeftY;
+		topLeftY = 1 - bottomRightY;
+		topRightX = 1 - bottomLeftX;
+		topRightY = bottomRightX;
+	else
+		boundingWidth = ((lineLength * cos) + (lineWidth * sin)) * lineFactor;
+		boundingHeight = ((lineWidth * cos) + (lineLength * sin)) * lineFactor;
+
+		bottomLeftX = sin * sin;
+		bottomLeftY = -(lineLength / lineWidth) * sinCos;
+		bottomRightX = 1 + (lineWidth / lineLength) * sinCos;
+		bottomRightY = bottomLeftX;
+
+		topLeftX = 1 - bottomRightX;
+		topLeftY = 1 - bottomLeftX;
+		topRightY = 1 - bottomLeftY;
+		topRightX = topLeftY;
+	end
+
+	-- Set texture coordinates and anchors
+	texture:ClearAllPoints();
+	texture:SetTexCoord(topLeftX, topLeftY, bottomLeftX, bottomLeftY, topRightX, topRightY, bottomRightX, bottomRightY);
+	texture:SetPoint("BOTTOMLEFT", canvasFrame, relPoint, cx - boundingWidth, cy - boundingHeight);
+	texture:SetPoint("TOPRIGHT",   canvasFrame, relPoint, cx + boundingWidth, cy + boundingHeight);
+end
+
+local LineMixin = {};
+
+function LineMixin:SetStartPoint(relPoint, x, y)
+	self.startX, self.startY = x, y;
+end
+
+function LineMixin:SetEndPoint(relPoint, x, y)
+	self.endX, self.endY = x, y;
+end
+
+function LineMixin:SetThickness(thickness)
+	self.thickness = thickness;
+end
+
+function LineMixin:Draw()
+	local parent = self:GetParent();
+	local x, y = parent:GetLeft(), parent:GetBottom();
+
+	self:ClearAllPoints();
+	DrawLine(self, parent, self.startX - x, self.startY - y, self.endX - x, self.endY - y, self.thickness or 32, 1);
+end
+
+local function drawLineOnShow(self)
+    local line = self.line
+    DrawLine(line, self, line.startX, line.startY, line.endX, line.endY, line.thickness*15, 1.2, "TOPLEFT");
+end
+
+local stub_line = setmetatable({}, QuestieCompat.NOOP_MT)
+function QuestieCompat.CreateLine(lineFrame, stub)
+    if stub then return stub_line end
+
+    local line = lineFrame:CreateTexture(nil, "OVERLAY")
+    line:SetTexture(QuestieLib.AddonPath.."Compat\\Waypoint-Line.blp")
+    line.SetColorTexture = line.SetVertexColor
+
+    for k,v in pairs(LineMixin) do
+        line[k] = v
+    end
+
+    lineFrame:SetScript("OnShow", drawLineOnShow)
+
+    return line
 end
 
 QuestieCompat.LibUIDropDownMenu = {
@@ -970,9 +1085,6 @@ function QuestieCompat:ADDON_LOADED(event, addon)
             setmetatable(module, QuestieCompat.NOOP_MT)
         end
 
-        local QuestieMap = QuestieLoader:ImportModule("QuestieMap")
-        QuestieMap.DrawWaypoints = QuestieCompat.NOOP
-
         QuestieLoader.PopulateGlobals = QuestieCompat.PopulateGlobals
         QuestieStream._writeByte = QuestieCompat._writeByte
         QuestieStream._readByte = QuestieCompat._readByte
@@ -992,5 +1104,6 @@ function QuestieCompat:ADDON_LOADED(event, addon)
         hooksecurefunc(QuestieEventHandler, "RegisterLateEvents", QuestieCompat.QuestieEventHandler_RegisterLateEvents)
         hooksecurefunc(QuestEventHandler, "RegisterEvents", QuestieCompat.QuestEventHandler_RegisterEvents)
         hooksecurefunc(TrackerLinePool, "Initialize", QuestieCompat.QuestieTracker_Initialize)
+        hooksecurefunc(QuestieQuest, "ToggleNotes", QuestieCompat.HBDPins.UpdateWorldMap)
     end
 end

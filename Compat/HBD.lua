@@ -472,6 +472,8 @@ local function HandleWorldMapPin(icon, data)
         icon:Show();
     end
 
+    if icon.type == "line" then return end
+
     local x, y
     if uiMapID == WORLD_MAP_ID then
         -- should this pin show on the world map?
@@ -551,12 +553,13 @@ local function UpdateWorldMap()
 
     for icon, data in pairs(worldmapPins) do
         icon:Hide()
-        icon:ClearAllPoints()
+        --icon:ClearAllPoints()
 
         QuestieMap.utils:RescaleIcon(icon, mapScale)
         HandleWorldMapPin(icon, data)
     end
 end
+pins.UpdateWorldMap = UpdateWorldMap
 
 local last_update = 0
 local function OnUpdateHandler(frame, elapsed)
