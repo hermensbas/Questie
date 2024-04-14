@@ -7,6 +7,9 @@ local _QuestieNameplate = {}
 ---@type QuestieTooltips
 local QuestieTooltips = QuestieLoader:ImportModule("QuestieTooltips")
 
+--- COMPATIBILITY ---
+local UnitGUID = QuestieCompat.UnitGUID
+
 local activeGUIDs = {}
 local npFrames = {}
 local npUnusedFrames = {}

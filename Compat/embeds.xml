@@ -27,10 +27,10 @@
 
     <!--Script file="Libs\Krowi_WorldMapButtons\Krowi_WorldMapButtons-1.4.lua"/-->
 
-    <Script file="FactionId.lua"/>
-    <Script file="QuestTagId.lua"/>
-    <Script file="QuestMoneyReward.lua"/>
-    <Script file="UiMapData.lua"/>
     <Script file="Compat.lua"/>
+    <Script file="FactionId.lua"/>
+    <Script file="QuestTag.lua"/>
+    <Script file="QuestMoney.lua"/>
+    <Script file="UiMapData.lua"/>
     <Script file="HBD.lua"/>
 </Ui>

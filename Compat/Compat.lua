@@ -24,7 +24,7 @@ local QuestXP = QuestieLoader:ImportModule("QuestXP")
 local QuestieCoords = QuestieLoader:ImportModule("QuestieCoords")
 
 -- addon/folder name
-QuestieCompat.addonName = "Questie-335"
+QuestieCompat.addonName = ...
 
 QuestieCompat.NOOP = function() end
 QuestieCompat.NOOP_MT = {__index = function() return QuestieCompat.NOOP end}
@@ -36,10 +36,10 @@ QuestieCompat.frame:SetScript("OnEvent", function(self, event, ...)
 end)
 
 -- current expansion level (https://wowpedia.fandom.com/wiki/WOW_PROJECT_ID)
-QuestieCompat.WOW_PROJECT_CLASSIC = 2
-QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC = 5
-QuestieCompat.WOW_PROJECT_WRATH_CLASSIC = 11
-QuestieCompat.WOW_PROJECT_ID = QuestieCompat.WOW_PROJECT_WRATH_CLASSIC
+QuestieCompat.WOW_PROJECT_CLASSIC = 1
+QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC = 2
+QuestieCompat.WOW_PROJECT_WRATH_CLASSIC = 3
+QuestieCompat.WOW_PROJECT_ID = tonumber(GetAddOnMetadata(QuestieCompat.addonName, "X-WOW_PROJECT_ID"))
 
 -- check for a specific type of group
 QuestieCompat.LE_PARTY_CATEGORY_HOME = 1 -- home-realm parties
@@ -168,10 +168,6 @@ QuestieCompat.C_Timer = {
 }
 
 local mapIdToUiMapId = {}
-for uiMapId, data in pairs(QuestieCompat.UiMapData) do
-    mapIdToUiMapId[data.mapID] = uiMapId
-end
-
 function QuestieCompat.GetCurrentUiMapID()
     local mapID = GetCurrentMapAreaID()
     if mapID == 0 then -- both the "Cosmic" and "Azeroth" maps return a mapID of 0
@@ -451,7 +447,7 @@ function QuestieCompat.GetActiveQuests()
 	return unpack(activeQuests)
 end
 
-local questTagIdToName = {
+local questTagToName = {
 	[1] = "Group",
 	[41] = "PvP",
 	[62] = "Raid",
@@ -465,9 +461,9 @@ local questTagIdToName = {
 -- Retrieves tag information about the quest.
 -- https://wowpedia.fandom.com/wiki/API_GetQuestTagInfo
 function QuestieCompat.GetQuestTagInfo(questId)
-    local tagId = QuestieCompat.QuestTagId[questId]
+    local tagId = QuestieCompat.QuestTag[questId]
 	if tagId then
-		return tagId, questTagIdToName[tagId]
+		return tagId, questTagToName[tagId]
 	end
 end
 
@@ -482,7 +478,7 @@ function QuestieCompat.UnitBuff(unit, index)
 end
 
 function QuestieCompat.GetMaxPlayerLevel()
-	return QuestieCompat.MAX_PLAYER_LEVEL or 80
+    return (Questie.IsWotlk and 80) or (Questie.IsTBC and 70) or (Questie.IsClassic and 60)
 end
 
 -- Returns the race of the unit.
@@ -1079,7 +1075,6 @@ function QuestieCompat:ADDON_LOADED(event, addon)
             "QuestieDebugOffer",
             "SeasonOfDiscovery",
             "QuestieDBMIntegration",
-            "QuestieNameplate",
         }) do
             local module = QuestieLoader:ImportModule(moduleName)
             setmetatable(module, QuestieCompat.NOOP_MT)
@@ -1099,6 +1094,10 @@ function QuestieCompat:ADDON_LOADED(event, addon)
             for i, str in pairs(patterns) do
                 chatMessagePattern[k][i] = QuestieLib:SanitizePattern(str)
             end
+        end
+
+        for uiMapId, data in pairs(QuestieCompat.UiMapData) do
+            mapIdToUiMapId[data.mapID] = uiMapId
         end
 
         hooksecurefunc(QuestieEventHandler, "RegisterLateEvents", QuestieCompat.QuestieEventHandler_RegisterLateEvents)

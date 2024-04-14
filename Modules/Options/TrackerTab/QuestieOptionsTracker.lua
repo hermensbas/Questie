@@ -147,7 +147,7 @@ function QuestieOptions.tabs.tracker:Initialize()
                         name = function() return l10n("List Achievements First") end,
                         desc = function() return l10n("When this is checked, the Questie Tracker will list Achievements first then Quests.") end,
                         disabled = function() return not Questie.db.profile.trackerEnabled end,
-                        hidden = function() return not Questie.IsWotlk end,
+                        hidden = function() return not (Questie.IsWotlk or QuestieCompat.Is335) end,
                         get = function() return Questie.db.profile.listAchievementsFirst end,
                         set = function(_, value)
                             Questie.db.profile.listAchievementsFirst = value

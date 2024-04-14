@@ -116,7 +116,7 @@ function TrackerLinePool.Initialize(questFrame)
         end
 
         line.OnUpdate = function(self, elapsed)
-            if Questie.IsWotlk then
+            if Questie.IsWotlk or QuestieCompat.Is335 then
                 timeElapsed = timeElapsed + elapsed
 
                 if timeElapsed > 1 and self.trackTimedQuest and self.label.activeTimer then
@@ -453,7 +453,7 @@ function TrackerLinePool.Initialize(questFrame)
             end)
         end)
 
-        if Questie.IsWotlk then
+        if Questie.IsWotlk or QuestieCompat.Is335 then
             line:HookScript("OnUpdate", line.OnUpdate)
         end
 

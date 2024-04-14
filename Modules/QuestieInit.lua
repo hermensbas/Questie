@@ -391,7 +391,7 @@ function QuestieInit:Init()
         -- This needs to be called ASAP otherwise tracked Achievements in the Blizzard WatchFrame shows upon login
         local WatchFrame = QuestTimerFrame or WatchFrame
 
-        if Questie.IsWotlk then
+        if Questie.IsWotlk or QuestieCompat.Is335 then
             -- Classic WotLK
             WatchFrame:Hide()
         else
@@ -400,7 +400,7 @@ function QuestieInit:Init()
             WatchFrame:ClearAllPoints()
             WatchFrame:SetPoint("TOP", "UIParent", -10000, -10000)
         end
-        if not Questie.IsWotlk then
+        if not (Questie.IsWotlk or QuestieCompat.Is335) then
             -- Need to hook this ASAP otherwise the scroll bars show up
             hooksecurefunc("ScrollFrame_OnScrollRangeChanged", function()
                 if TrackedQuestsScrollFrame then

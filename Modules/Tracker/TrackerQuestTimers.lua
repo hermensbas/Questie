@@ -23,7 +23,7 @@ local blizzardTimerLocation = {}
 local timer
 
 -- Save the default location of the Blizzard QuestTimerFrame
-if not Questie.IsWotlk then
+if not (Questie.IsWotlk or QuestieCompat.Is335) then
     blizzardTimerLocation = { QuestTimerFrame:GetPoint() }
 end
 
@@ -44,7 +44,7 @@ function TrackerQuestTimers:Initialize()
     end)
 
     -- Pre-Classic WotLK
-    if not Questie.IsWotlk then
+    if not (Questie.IsWotlk or QuestieCompat.Is335) then
         local timeElapsed = 0
 
         WatchFrame:HookScript("OnUpdate", function(_, elapsed)
@@ -58,7 +58,7 @@ function TrackerQuestTimers:Initialize()
 end
 
 function TrackerQuestTimers:HideBlizzardTimer()
-    if Questie.IsWotlk then
+    if Questie.IsWotlk or QuestieCompat.Is335 then
         -- Classic WotLK
         WatchFrame:Hide()
     else
@@ -70,7 +70,7 @@ function TrackerQuestTimers:HideBlizzardTimer()
 end
 
 function TrackerQuestTimers:ShowBlizzardTimer()
-    if Questie.IsWotlk then
+    if Questie.IsWotlk or QuestieCompat.Is335 then
         -- Classic WotLK
         WatchFrame:Show()
     else

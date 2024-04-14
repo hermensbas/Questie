@@ -8,7 +8,7 @@ local WOW_PROJECT_WRATH_CLASSIC = QuestieCompat.WOW_PROJECT_WRATH_CLASSIC
 local WOW_PROJECT_ID = QuestieCompat.WOW_PROJECT_ID
 
 -- Check addon is not renamed to avoid conflicts in global name space.
-if addonName ~= QuestieCompat.addonName then
+if (not QuestieCompat.Is335) and addonName ~= "Questie" then
     local msg = { "You have renamed Questie addon.", "This is restricted to avoid issues.", "Please remove '"..addonName.."'", "and reinstall the original version."}
     StaticPopupDialogs["QUESTIE_ADDON_NAME_ERROR"] = {
         text = "|cffff0000ERROR|r\n"..msg[1].."\n"..msg[2].."\n\n"..msg[3].."\n"..msg[4],

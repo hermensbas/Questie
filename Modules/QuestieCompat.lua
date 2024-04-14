@@ -2,8 +2,6 @@
 ---@class QuestieCompat
 QuestieCompat = setmetatable({}, {__index = _G})
 
--- addon/folder name
-QuestieCompat.addonName = "Questie"
 -- addon is running on 3.3.5 WotLK client
 QuestieCompat.Is335 = (select(4, GetBuildInfo()) == 30300)
 

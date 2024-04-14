@@ -2,14 +2,7 @@
 local QuestieMap = QuestieLoader:ImportModule("QuestieMap");
 
 local mapData = QuestieCompat.UiMapData -- table { width, height, left, top, .instance, .name, .mapType }
-
--- data for the azeroth world map
--- table { width, height, left, top }
-local worldMapData = {
-    [0] = { 48033.24, 32020.8, 36867.97, 14848.84 },
-    [1] = { 47908.72, 31935.28, 8552.61, 18467.83 },
-    [571] = { 47662.7, 31772.19, 25198.53, 11072.07 },
-}
+local worldMapData = QuestieCompat.worldMapData -- table { width, height, left, top }
 
 local HBD = {mapData = mapData}
 QuestieCompat.HBD = HBD
