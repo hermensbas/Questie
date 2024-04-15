@@ -4,6 +4,8 @@ local QuestieLib = QuestieLoader:ImportModule("QuestieLib")
 local QuestieStream = QuestieLoader:ImportModule("QuestieStreamLib")
 ---@type QuestieDB
 local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
+---@type QuestieOptions
+local QuestieOptions = QuestieLoader:ImportModule("QuestieOptions")
 ---@type QuestieEventHandler
 local QuestieEventHandler = QuestieLoader:ImportModule("QuestieEventHandler")
 ---@type QuestieQuest
@@ -1068,41 +1070,88 @@ function QuestieCompat.PopulateGlobals(self)
     end
 end
 
+StaticPopupDialogs["QUESTIE_RELOAD"] = {
+    text = "Changes you have made require a UI reload",
+    button1 = 'Reload UI',
+    button2 = CANCEL,
+    OnAccept = function()
+        ReloadUI()
+    end,
+    OnShow = function(self)
+        self:SetFrameStrata("TOOLTIP")
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3
+}
+
+function QuestieCompat.QuestieOptions_Initialize()
+    QuestieCompat.orig_QuestieOptions_Initialize()
+
+    local optionsTable = LibStub("AceConfigRegistry-3.0"):GetOptionsTable("Questie", "dialog", "MyLib-1.0")
+
+    optionsTable.args.advanced_tab.args.compat_header = {
+        type = "header",
+        order = 1.41,
+        name = "3.3.5 Compatibility Settings",
+    }
+
+    optionsTable.args.advanced_tab.args.useWotlkMapData = {
+        type = "toggle",
+        order = 1.42,
+        name = "Use WotLK map data",
+        desc = "Use WotLK map data",
+        width = "full",
+        disabled = function() return QuestieCompat.WOW_PROJECT_ID == QuestieCompat.WOW_PROJECT_WRATH_CLASSIC end,
+        get = function (info) return QuestieOptions:GetProfileValue(info); end,
+        set = function (info, value)
+            QuestieOptions:SetProfileValue(info, value)
+            StaticPopup_Show("QUESTIE_RELOAD")
+        end,
+    }
+end
+
 function QuestieCompat:ADDON_LOADED(event, addon)
-	if addon == QuestieCompat.addonName then
-        for _, moduleName in pairs({
-            "HBDHooks",
-            "QuestieDebugOffer",
-            "SeasonOfDiscovery",
-            "QuestieDBMIntegration",
-        }) do
-            local module = QuestieLoader:ImportModule(moduleName)
-            setmetatable(module, QuestieCompat.NOOP_MT)
-        end
+    if addon ~= QuestieCompat.addonName then return end
 
-        QuestieLoader.PopulateGlobals = QuestieCompat.PopulateGlobals
-        QuestieStream._writeByte = QuestieCompat._writeByte
-        QuestieStream._readByte = QuestieCompat._readByte
-        QuestieStream.Save = QuestieCompat.Save
-        ZoneDB.private.RunTests = QuestieCompat.NOOP
-        QuestieLib.TextWrap = QuestieCompat.TextWrap
-        QuestieCoords.GetPlayerMapPosition = QuestieCompat.GetPlayerMapPosition
-        QuestieCoords.ResetMiniWorldMapText = QuestieCompat.NOOP
-        _EventHandler.UiInfoMessage = QuestieCompat.UiInfoMessage
+    Questie.db.profile.useWotlkMapData = Questie.db.profile.useWotlkMapData or false
+    QuestieCompat.LoadUiMapData(Questie.db.profile.useWotlkMapData and QuestieCompat.WOW_PROJECT_WRATH_CLASSIC)
 
-        for k, patterns in pairs(chatMessagePattern) do
-            for i, str in pairs(patterns) do
-                chatMessagePattern[k][i] = QuestieLib:SanitizePattern(str)
-            end
-        end
-
-        for uiMapId, data in pairs(QuestieCompat.UiMapData) do
-            mapIdToUiMapId[data.mapID] = uiMapId
-        end
-
-        hooksecurefunc(QuestieEventHandler, "RegisterLateEvents", QuestieCompat.QuestieEventHandler_RegisterLateEvents)
-        hooksecurefunc(QuestEventHandler, "RegisterEvents", QuestieCompat.QuestEventHandler_RegisterEvents)
-        hooksecurefunc(TrackerLinePool, "Initialize", QuestieCompat.QuestieTracker_Initialize)
-        hooksecurefunc(QuestieQuest, "ToggleNotes", QuestieCompat.HBDPins.UpdateWorldMap)
+    for uiMapId, data in pairs(QuestieCompat.UiMapData) do
+        mapIdToUiMapId[data.mapID] = uiMapId
     end
+
+    for k, patterns in pairs(chatMessagePattern) do
+        for i, str in pairs(patterns) do
+            chatMessagePattern[k][i] = QuestieLib:SanitizePattern(str)
+        end
+    end
+
+    for _, moduleName in pairs({
+        "HBDHooks",
+        "QuestieDebugOffer",
+        "SeasonOfDiscovery",
+        "QuestieDBMIntegration",
+    }) do
+        local module = QuestieLoader:ImportModule(moduleName)
+        setmetatable(module, QuestieCompat.NOOP_MT)
+    end
+
+	QuestieLoader.PopulateGlobals = QuestieCompat.PopulateGlobals
+    QuestieStream._writeByte = QuestieCompat._writeByte
+    QuestieStream._readByte = QuestieCompat._readByte
+    QuestieStream.Save = QuestieCompat.Save
+    ZoneDB.private.RunTests = QuestieCompat.NOOP
+    QuestieLib.TextWrap = QuestieCompat.TextWrap
+    QuestieCoords.GetPlayerMapPosition = QuestieCompat.GetPlayerMapPosition
+    QuestieCoords.ResetMiniWorldMapText = QuestieCompat.NOOP
+    _EventHandler.UiInfoMessage = QuestieCompat.UiInfoMessage
+    QuestieCompat.orig_QuestieOptions_Initialize = QuestieOptions.Initialize
+    QuestieOptions.Initialize = QuestieCompat.QuestieOptions_Initialize
+
+    hooksecurefunc(QuestieEventHandler, "RegisterLateEvents", QuestieCompat.QuestieEventHandler_RegisterLateEvents)
+    hooksecurefunc(QuestEventHandler, "RegisterEvents", QuestieCompat.QuestEventHandler_RegisterEvents)
+    hooksecurefunc(TrackerLinePool, "Initialize", QuestieCompat.QuestieTracker_Initialize)
+    hooksecurefunc(QuestieQuest, "ToggleNotes", QuestieCompat.HBDPins.UpdateWorldMap)
 end
