@@ -24,6 +24,8 @@ local QuestiePlayer = QuestieLoader:ImportModule("QuestiePlayer")
 local QuestXP = QuestieLoader:ImportModule("QuestXP")
 ---@class QuestieCoords
 local QuestieCoords = QuestieLoader:ImportModule("QuestieCoords")
+---@class Sounds
+local Sounds = QuestieLoader:ImportModule("Sounds")
 
 -- addon/folder name
 QuestieCompat.addonName = ...
@@ -237,7 +239,7 @@ QuestieCompat.C_Map = {
     -- https://wowpedia.fandom.com/wiki/API_C_Map.GetWorldPosFromMapPos
 	GetWorldPosFromMapPos = function(uiMapID, mapPos)
         local x, y, instanceID = QuestieCompat.HBD:GetWorldCoordinatesFromZone(mapPos.x, mapPos.y, uiMapID)
-        return instanceID, {x = x, y = y}
+        return instanceID or 0, {x = x or 0, y = y or 0}
 	end,
 }
 
@@ -672,21 +674,28 @@ function QuestieCompat.TextWrap(self, line, prefix, combineTrailing, desiredWidt
     return empty_table
 end
 
-local fontString = UIParent:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-fontString:Hide()
+local unboundedFS = UIParent:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+unboundedFS:SetPoint("TOPLEFT", 0, 0)
+unboundedFS:Hide()
 -- The minimum width necessary to contain the entire text without truncation
 -- https://wowpedia.fandom.com/wiki/API_FontString_GetStringWidth
 function QuestieCompat.GetUnboundedStringWidth(self)
-    fontString:SetFont(self:GetFont())
-    fontString:SetText(self:GetText())
+    unboundedFS:SetWidth(0)
+    unboundedFS:SetFont(self:GetFont())
+    unboundedFS:SetText(self:GetText())
 
-    return fontString:GetStringWidth()
+    return unboundedFS:GetStringWidth()
 end
 
 -- ???
 -- https://wowpedia.fandom.com/wiki/API_FontString_GetNumLines
 function QuestieCompat.GetNumLines(self)
-    return 1
+    local fontName, fontHeight, fontFlags = self:GetFont()
+    unboundedFS:SetWidth(self:GetWidth())
+    unboundedFS:SetFont(fontName, fontHeight, fontFlags)
+    unboundedFS:SetText(self:GetText())
+
+	return math.floor(unboundedFS:GetHeight()/fontHeight)
 end
 
 local function DrawLine(texture, canvasFrame, startX, startY, endX, endY, lineWidth, lineFactor, relPoint)
@@ -994,19 +1003,21 @@ function QuestieCompat.QuestieEventHandler_RegisterLateEvents()
 
     -- In fullscreen mode, WorldMap intercepts keyboard input,
     -- preventing the MODIFIER_STATE_CHANGED event
-    local modifierStateChanged
-    WorldMapFrame:HookScript("OnKeyDown", function(self, key)
-        if IsModifierKeyDown() then
-            _EventHandler:ModifierStateChanged(key, 1)
-            modifierStateChanged = true
-        end
-    end)
-    WorldMapFrame:HookScript("OnKeyUp", function(self, key)
-        if modifierStateChanged then
-            _EventHandler:ModifierStateChanged(key, 0)
-            modifierStateChanged = nil
-        end
-    end)
+    if WorldMapFrame:GetScript("OnKeyDown") then
+        local modifierStateChanged
+        WorldMapFrame:HookScript("OnKeyDown", function(self, key)
+            if IsModifierKeyDown() then
+                _EventHandler:ModifierStateChanged(key, 1)
+                modifierStateChanged = true
+            end
+        end)
+        WorldMapFrame:HookScript("OnKeyUp", function(self, key)
+            if modifierStateChanged then
+                _EventHandler:ModifierStateChanged(key, 0)
+                modifierStateChanged = nil
+            end
+        end)
+    end
 end
 
 function QuestieCompat.QuestEventHandler_RegisterEvents()
@@ -1057,6 +1068,7 @@ function QuestieCompat.QuestieTracker_Initialize(trackerQuestFrame)
     for i = 1, 250 do
         local line = _G["linePool" .. i]
         line.label.GetUnboundedStringWidth = QuestieCompat.GetUnboundedStringWidth
+        line.label.GetWrappedWidth = line.label.GetWidth
         line.label.GetNumLines = QuestieCompat.GetNumLines
     end
 end
@@ -1068,6 +1080,10 @@ function QuestieCompat.PopulateGlobals(self)
             _G[name] = module
         end
     end
+end
+
+function QuestieCompat.GetSelectedSoundFile(typeSelected)
+    return QuestieCompat.orig_GetSelectedSoundFile(typeSelected):gsub("[^.]+$", "wav")
 end
 
 StaticPopupDialogs["QUESTIE_RELOAD"] = {
@@ -1090,6 +1106,20 @@ function QuestieCompat.QuestieOptions_Initialize()
     QuestieCompat.orig_QuestieOptions_Initialize()
 
     local optionsTable = LibStub("AceConfigRegistry-3.0"):GetOptionsTable("Questie", "dialog", "MyLib-1.0")
+
+    optionsTable.args.general_tab.args.interface_options_group.args.instantQuest.get = function()
+        return GetCVar("questFadingDisable") == '1' and true or false
+    end
+    optionsTable.args.general_tab.args.interface_options_group.args.instantQuest.set = function(info, value)
+        QUEST_FADING_DISABLE = tostring(value and 1 or 0)
+        SetCVar("questFadingDisable", tostring(value and 1 or 0))
+    end
+
+    Questie.db.profile.hideUnexploredMapIcons = false
+    optionsTable.args.icons_tab.args.map_settings_group.args.hideUnexploredMapIconsToggle.disabled = true
+
+    Questie.db.profile.nameplateEnabled = false
+    optionsTable.args.nameplate_tab.args.nameplate_options_group.disabled = true
 
     optionsTable.args.advanced_tab.args.compat_header = {
         type = "header",
@@ -1133,6 +1163,7 @@ function QuestieCompat:ADDON_LOADED(event, addon)
         "QuestieDebugOffer",
         "SeasonOfDiscovery",
         "QuestieDBMIntegration",
+        "QuestieProfiler",
     }) do
         local module = QuestieLoader:ImportModule(moduleName)
         setmetatable(module, QuestieCompat.NOOP_MT)
@@ -1149,6 +1180,8 @@ function QuestieCompat:ADDON_LOADED(event, addon)
     _EventHandler.UiInfoMessage = QuestieCompat.UiInfoMessage
     QuestieCompat.orig_QuestieOptions_Initialize = QuestieOptions.Initialize
     QuestieOptions.Initialize = QuestieCompat.QuestieOptions_Initialize
+    QuestieCompat.orig_GetSelectedSoundFile = Sounds.GetSelectedSoundFile
+    Sounds.GetSelectedSoundFile = QuestieCompat.GetSelectedSoundFile
 
     hooksecurefunc(QuestieEventHandler, "RegisterLateEvents", QuestieCompat.QuestieEventHandler_RegisterLateEvents)
     hooksecurefunc(QuestEventHandler, "RegisterEvents", QuestieCompat.QuestEventHandler_RegisterEvents)
