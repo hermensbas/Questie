@@ -35,6 +35,8 @@ QuestieCompat.NOOP_MT = {__index = function() return QuestieCompat.NOOP end}
 
 QuestieCompat.frame = CreateFrame("Frame")
 QuestieCompat.frame:RegisterEvent("ADDON_LOADED")
+QuestieCompat.frame:RegisterEvent("PLAYER_LOGIN")
+QuestieCompat.frame:RegisterEvent("PLAYER_LOGOUT")
 QuestieCompat.frame:SetScript("OnEvent", function(self, event, ...)
     QuestieCompat[event](self, event, ...)
 end)
@@ -1086,6 +1088,13 @@ function QuestieCompat.GetSelectedSoundFile(typeSelected)
     return QuestieCompat.orig_GetSelectedSoundFile(typeSelected):gsub("[^.]+$", "wav")
 end
 
+function QuestieCompat:ToggleQuestTrackingTooltips(event)
+    local value = tostring(event:find("LOGOUT") and 1 or 0)
+    SetCVar("showQuestTrackingTooltips", value)
+end
+QuestieCompat.PLAYER_LOGIN = QuestieCompat.ToggleQuestTrackingTooltips
+QuestieCompat.PLAYER_LOGOUT = QuestieCompat.ToggleQuestTrackingTooltips
+
 StaticPopupDialogs["QUESTIE_RELOAD"] = {
     text = "Changes you have made require a UI reload",
     button1 = 'Reload UI',
@@ -1123,16 +1132,18 @@ function QuestieCompat.QuestieOptions_Initialize()
 
     optionsTable.args.advanced_tab.args.compat_header = {
         type = "header",
-        order = 1.41,
+        order = 6,
         name = "3.3.5 Compatibility Settings",
+        hidden = function() return not Questie.db.profile.debugEnabled; end,
     }
 
     optionsTable.args.advanced_tab.args.useWotlkMapData = {
         type = "toggle",
-        order = 1.42,
+        order = 6.1,
         name = "Use WotLK map data",
         desc = "Use WotLK map data",
-        width = "full",
+        width = 1.8,
+        hidden = function() return not Questie.db.profile.debugEnabled; end,
         disabled = function() return QuestieCompat.WOW_PROJECT_ID == QuestieCompat.WOW_PROJECT_WRATH_CLASSIC end,
         get = function (info) return QuestieOptions:GetProfileValue(info); end,
         set = function (info, value)
@@ -1140,10 +1151,29 @@ function QuestieCompat.QuestieOptions_Initialize()
             StaticPopup_Show("QUESTIE_RELOAD")
         end,
     }
+
+    optionsTable.args.advanced_tab.args.initDelay = {
+        type = "range",
+        order = 6.2,
+        name = "Reduce init rate",
+        desc = "Reduce init rate",
+        width = 1.5,
+        isPercent = true,
+        min = 0,
+        max = 1,
+        step = 0.01,
+        hidden = function() return not Questie.db.profile.debugEnabled; end,
+        get = function(info) return QuestieOptions:GetProfileValue(info)*10; end,
+        set = function (info, value)
+            QuestieOptions:SetProfileValue(info, value/10)
+        end,
+    }
 end
 
 function QuestieCompat:ADDON_LOADED(event, addon)
     if addon ~= QuestieCompat.addonName then return end
+
+    Questie.db.profile.initDelay = Questie.db.profile.initDelay or 0.03
 
     Questie.db.profile.useWotlkMapData = Questie.db.profile.useWotlkMapData or false
     QuestieCompat.LoadUiMapData(Questie.db.profile.useWotlkMapData and QuestieCompat.WOW_PROJECT_WRATH_CLASSIC)
@@ -1163,7 +1193,7 @@ function QuestieCompat:ADDON_LOADED(event, addon)
         "QuestieDebugOffer",
         "SeasonOfDiscovery",
         "QuestieDBMIntegration",
-        "QuestieProfiler",
+        "Profiler",
     }) do
         local module = QuestieLoader:ImportModule(moduleName)
         setmetatable(module, QuestieCompat.NOOP_MT)

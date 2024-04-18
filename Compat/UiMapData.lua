@@ -60,18 +60,18 @@ QuestieCompat.UiMapData =
 		["instance"] = 1,
 		["name"] = "Kalimdor",
 	},
-	[1415] =
-	{
-		[1] = 35199.900390625,
-		[2] = 23466.600097656,
-		[3] = 16000,
-		[4] = 7466.6000976562,
-		["mapType"] = 2,
-		["parentMapID"] = 947,
-		["mapID"] = 15,
-		["instance"] = 0,
-		["name"] = "Eastern Kingdoms",
-	},
+    [1415] =
+    {
+        [1] = 40741.181640625,
+        [2] = 27149.6875,
+        [3] = 18171.970703125,
+        [4] = 11176.34375,
+        ["mapType"] = 2,
+        ["parentMapID"] = 947,
+        ["mapID"] = 15,
+        ["instance"] = 0,
+        ["name"] = "Eastern Kingdoms",
+    },
 	[1416] =
 	{
 		[1] = 2799.9999389649,
@@ -660,18 +660,6 @@ function QuestieCompat.LoadUiMapData(force)
             ["mapID"] = 0,
             ["instance"] = 530,
             ["name"] = "Azeroth",
-        },
-        [1415] =
-        {
-            [1] = 40741.181640625,
-            [2] = 27149.6875,
-            [3] = 18171.970703125,
-            [4] = 11176.34375,
-            ["mapType"] = 2,
-            ["parentMapID"] = 947,
-            ["mapID"] = 15,
-            ["instance"] = 0,
-            ["name"] = "Eastern Kingdoms",
         },
         [1941] =
         {

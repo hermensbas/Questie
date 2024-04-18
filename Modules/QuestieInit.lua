@@ -385,7 +385,7 @@ end
 
 -- called by the PLAYER_LOGIN event handler
 function QuestieInit:Init()
-    ThreadLib.ThreadError(_QuestieInit.StartStageCoroutine, 0, l10n("Error during initialization!"))
+    ThreadLib.ThreadError(_QuestieInit.StartStageCoroutine, Questie.db.profile.initDelay or 0, l10n("Error during initialization!"))
 
     if Questie.db.profile.trackerEnabled then
         -- This needs to be called ASAP otherwise tracked Achievements in the Blizzard WatchFrame shows upon login
