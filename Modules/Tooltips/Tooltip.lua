@@ -78,42 +78,26 @@ end
 ---@param questId number
 function QuestieTooltips:RemoveQuest(questId)
     if (not QuestieTooltips.lookupKeysByQuestId[questId]) then
+        -- Tooltip has already been removed
         return
     end
 
-    if QuestieTooltips.lookupKeysByQuestId[questId] then
-        -- Remove tooltip related keys from quest table so that
-        -- it can be readded/registered by other quest functions.
-        local quest = QuestieDB.GetQuest(questId)
+    -- Remove tooltip related keys from quest table so that
+    -- it can be readded/registered by other quest functions.
+    local quest = QuestieDB.GetQuest(questId)
 
-        if quest then
-            for _, objective in pairs(quest.Objectives) do
-                objective.AlreadySpawned = {}
-
-                if objective.hasRegisteredTooltips then
-                    objective.hasRegisteredTooltips = false
-                end
-
-                if objective.registeredItemTooltips then
-                    objective.registeredItemTooltips = false
-                end
-            end
-
-            for _, objective in pairs(quest.SpecialObjectives) do
-                objective.AlreadySpawned = {}
-
-                if objective.hasRegisteredTooltips then
-                    objective.hasRegisteredTooltips = false
-                end
-
-                if objective.registeredItemTooltips then
-                    objective.registeredItemTooltips = false
-                end
-            end
+    if quest then
+        for _, objective in pairs(quest.Objectives) do
+            objective.AlreadySpawned = {}
+            objective.hasRegisteredTooltips = false
+            objective.registeredItemTooltips = false
         end
-    else
-        -- Tooltip has already been removed
-        return
+
+        for _, objective in pairs(quest.SpecialObjectives) do
+            objective.AlreadySpawned = {}
+            objective.hasRegisteredTooltips = false
+            objective.registeredItemTooltips = false
+        end
     end
 
     Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieTooltips:RemoveQuest]", questId)
@@ -255,6 +239,7 @@ function QuestieTooltips:GetTooltip(key)
                     }
                 end
                 if not QuestiePlayer.currentQuestlog[questId] then
+                    -- TODO: Is this still required?
                     QuestieTooltips.lookupByKey[key][k] = nil
                 else
                     tooltipData[questId].objectivesText = _InitObjectiveTexts(tooltipData[questId].objectivesText, objectiveIndex, playerName)
@@ -417,3 +402,5 @@ function QuestieTooltips:Initialize()
         end
     end)
 end
+
+return QuestieTooltips

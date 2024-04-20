@@ -79,7 +79,7 @@ local runeQuestsInSoD = {-- List quests here to have them flagged as Rune quests
     [78149] = 1, -- Mage Icy Veins
     [78150] = 1, -- Mage Icy Veins
     [78229] = 1, -- Druid Wild Growth
-    [78261] = 1, -- Rogue Deadly Brew Part 2
+    [78261] = 1, -- Rogue Deadly Brew Part 1
     [78265] = 1, -- Grizzby prequest for multiple runes
     [78266] = 1, -- Grizzby prequest for multiple runes
     [78267] = 1, -- Grizzby prequest for multiple runes
@@ -94,9 +94,11 @@ local runeQuestsInSoD = {-- List quests here to have them flagged as Rune quests
     [78537] = 1, -- Shaman Earth Shield Part 2
     [78561] = 1, -- Shaman Earth Shield Part 3
     [78575] = 1, -- Shaman Earth Shield Part 4
+    [78676] = 2, -- Rogue Shadowstep Part 1
     [78680] = 1, -- Warlock Metamorphosis Part 2
     [78681] = 1, -- Warlock Metamorphosis Part 3
     [78684] = 1, -- Warlock Metamorphosis Part 4
+    [78699] = 2, -- Rogue Shadowstep Part 2
     [78702] = 1, -- Warlock Metamorphosis Part 5
     [78823] = 2, -- Hunter Exposed Weakness Part 1
     [78830] = 2, -- Hunter Exposed Weakness Part 2
@@ -109,6 +111,7 @@ local runeQuestsInSoD = {-- List quests here to have them flagged as Rune quests
     [79095] = 1, -- Mage Icy Veins
     [79096] = 1, -- Mage Icy Veins
     [79097] = 1, -- Mage Icy Veins
+    [79298] = 2, -- Warlock Grimoire of Synergy Part 3
     [79348] = 2, -- Druid Nourish (The Lost Ancient)
     [79377] = 2, -- Druid Nourish (The Lost Saplings)
     [79229] = 2, -- Highway Robbery
@@ -126,7 +129,10 @@ local runeQuestsInSoD = {-- List quests here to have them flagged as Rune quests
     [79442] = 2, -- Shaman MailStrom Weapon (Catching Up)
     [79535] = 2, -- Mage Icy Veins/Spell Power
     [79536] = 2, -- Mage Icy Veins/Spell Power
+    [79624] = 2, -- Anyone Can Cook
     [79677] = 2, -- A Quick Grocery Run
+    [79678] = 2, -- Taste Testing
+    [79731] = 2, -- Priest Dispersion
     [79939] = 2, -- Paladin Sheath of Light Part 1
     [79940] = 2, -- Paladin Sheath of Light Part 2
     [79945] = 2, -- Paladin Sheath of Light Part 3
@@ -404,6 +410,41 @@ local runeQuestsInSoD = {-- List quests here to have them flagged as Rune quests
     [90248] = 2, -- Paladin Enlightened Judgements
     [90249] = 2, -- Paladin Guarded by the Light
     [90250] = 2, -- Paladin Sheath of Light Part 2.5
+    [90251] = 2, -- Hunter Invigoration
+    [90252] = 2, -- Hunter Invigoration
+    [90253] = 2, -- Hunter Invigoration
+    [90254] = 2, -- Hunter Invigoration
+    [90255] = 2, -- Warlock Invocation
+    [90256] = 2, -- Warlock Shadowflame
+    [90257] = 2, -- Warlock Dance of the Wicked
+    [90258] = 2, -- Priest Pain Suppression
+    [90259] = 2, -- Priest Pain Suppression
+    [90260] = 2, -- Priest Pain Suppression
+    [90261] = 2, -- Priest Pain Suppression
+    [90262] = 2, -- Priest Pain Suppression
+    [90263] = 2, -- Rogue Shuriken Toss
+    [90264] = 2, -- Rogue Master of Subtlety
+    [90265] = 2, -- Druid Survival Instincts
+    [90266] = 2, -- Druid Survival Instincts
+    [90267] = 2, -- Druid Survival Instincts
+    [90268] = 2, -- Druid Survival Instincts
+
+    -- P3 SoD Runes
+    [80411] = 3, -- Rogue Honor Among Thieves
+    [80453] = 3, -- Rogue Honor Among Thieves
+    [80454] = 3, -- Rogue Honor Among Thieves
+    [80455] = 3, -- Rogue Honor Among Thieves
+    [80526] = 3, -- Rogue Honor Among Thieves
+    [82084] = 3, -- Mage Temporal Anomaly
+    [82316] = 3, -- Priest Eye of the Void
+    [90269] = 3, -- Druid Gale Winds
+    [90271] = 3, -- Hunter Raptor Fury
+    [90272] = 3, -- Hunter T.N.T
+    [90273] = 3, -- Mage Molten Armor
+    [90274] = 3, -- Paladin Improved Hammer of Wrath
+    [90275] = 3, -- Paladin Wrath
+    [90276] = 3, -- Priest Void Zone
+    [90277] = 3, -- Rogue Cut to the Chase
 }
 
 --- "automatic" phase detection for the first few phases;
@@ -1051,6 +1092,12 @@ local questsToBlacklistBySoDPhase = {
     },
     [17] = { -- Never appearing in Season of Discovery
         [1203] = true, -- Jarl Needs a Blade - Replaced by 81570
+        [1878] = true, -- Water Pouch Bounty - Replaced by 82209
+        [2758] = true, -- The Origins of Smithing - Replaced by 80241
+        [2849] = true, -- Wild Leather Vest - Replaced by 82657
+        [2856] = true, -- Wild Leather Vest - Replaced by 82656
+        [5284] = true, -- The Way of the Weaponsmith - Replaced by 82662
+        [8302] = true, -- The Way of the Weaponsmith - Replaced by 82665
 
         -- Original Blackfathom Deeps quests (instance reworked to raid, new quest IDs)
         [909] = true,
@@ -1092,6 +1139,24 @@ local questsToBlacklistBySoDPhase = {
         [4604] = true,
         [4605] = true,
         [4606] = true,
+
+        -- Original Sunken Temple quests (instance reworked to raid, new quest IDs)
+        [1445] = true,
+        [1446] = true,
+        [1475] = true,
+        [3373] = true,
+        [3447] = true,
+        [3528] = true,
+        [4143] = true,
+        [8232] = true,
+        [8236] = true,
+        [8253] = true,
+        [8257] = true,
+        [8413] = true,
+        [8418] = true,
+        [8422] = true,
+        [8425] = true,
+        [9053] = true,
     },
 }
 

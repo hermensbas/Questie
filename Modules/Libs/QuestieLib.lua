@@ -740,3 +740,5 @@ function QuestieLib.GetSpawnDistance(spawnA, spawnB)
 
     return math_sqrt(distanceX * distanceX + distanceY * distanceY)
 end
+
+return QuestieLib

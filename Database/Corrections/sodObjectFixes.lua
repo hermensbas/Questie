@@ -254,6 +254,12 @@ function SeasonOfDiscovery:LoadObjects()
                 [zoneIDs.WESTFALL] = {{37.4, 50.7}},
             },
         },
+        [419741] = { -- Sacrificial Altar
+            [objectKeys.zoneID] = zoneIDs.DESOLACE,
+            [objectKeys.spawns] = {
+                [zoneIDs.DESOLACE] = {{81.4,79.8}},
+            },
+        },
         [420055] = { -- Rowboat
             [objectKeys.zoneID] = zoneIDs.ARATHI_HIGHLANDS,
             [objectKeys.spawns] = {
@@ -297,6 +303,14 @@ function SeasonOfDiscovery:LoadObjects()
                 [zoneIDs.FERALAS] = {{29.3, 93.8}},
             },
         },
+        [424082] = {
+            [objectKeys.spawns] = {},
+        },
+        [424264] = { -- Grave
+            [objectKeys.spawns] = {
+                [zoneIDs.DUSTWALLOW_MARSH] = {{63.7, 42.4}},
+            },
+        },
         [424265] = { -- Grave
             [objectKeys.zoneID] = zoneIDs.SWAMP_OF_SORROWS,
             [objectKeys.spawns] = {
@@ -313,6 +327,12 @@ function SeasonOfDiscovery:LoadObjects()
             [objectKeys.zoneID] = zoneIDs.ARATHI_HIGHLANDS,
             [objectKeys.spawns] = {
                 [zoneIDs.ARATHI_HIGHLANDS] = {{62,54}},
+            },
+        },
+        [441848] = { -- Small Burrow
+            [objectKeys.zoneID] = zoneIDs.STRANGLETHORN_VALE,
+            [objectKeys.spawns] = {
+                [zoneIDs.STRANGLETHORN_VALE] = {{40.75,85.72}},
             },
         },
 

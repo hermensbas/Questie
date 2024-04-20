@@ -483,6 +483,11 @@ function SeasonOfDiscovery:LoadNPCs()
         [215850] = { -- Raszel Ander
             [npcKeys.friendlyToFaction] = "AH",
         },
+        [216289] = { -- Orokai
+            [npcKeys.spawns] = {
+                [zoneIDs.MOONGLADE] = {{41.2, 43.6}},
+            },
+        },
         [216902] = { -- Wulmort Jinglepocket
             [npcKeys.spawns] = {
                 [zoneIDs.IRONFORGE] = {{33.7, 67.23}},
@@ -519,7 +524,7 @@ function SeasonOfDiscovery:LoadNPCs()
         [217703] = { -- Singed Highperch Consort
             [npcKeys.friendlyToFaction] = "H",
             [npcKeys.spawns] = {
-                [zoneIDs.ASHENVALE] = {{10.4, 40.2}},
+                [zoneIDs.THOUSAND_NEEDLES] = {{10.4, 40.2}},
             },
         },
         [217706] = { -- Kazragore
@@ -534,6 +539,26 @@ function SeasonOfDiscovery:LoadNPCs()
         [217711] = { -- Seared Needles Cougar
             [npcKeys.spawns] = {
                 [zoneIDs.THOUSAND_NEEDLES] = {{23.4, 23.4}},
+            },
+        },
+        [217412] = { -- Amaryllis Webb
+            [npcKeys.spawns] = {
+                [zoneIDs.SWAMP_OF_SORROWS] = {{25.2, 54.6}},
+            },
+        },
+        [217588] = { -- Arbor Tarantula
+            [npcKeys.spawns] = {
+                [zoneIDs.STRANGLETHORN_VALE] = {{45.2, 19.6}},
+            },
+        },
+        [217589] = { -- Hay Weevil
+            [npcKeys.spawns] = {
+                [zoneIDs.ARATHI_HIGHLANDS] = {{30.8, 28.6},{54.2, 38.6},{61.2, 55.4}},
+            },
+        },
+        [217590] = { -- Flesh Picker
+            [npcKeys.spawns] = {
+                [zoneIDs.DESOLACE] = {{51.4, 59.8}},
             },
         },
         [218115] = { -- Mai'zin
@@ -557,6 +582,76 @@ function SeasonOfDiscovery:LoadNPCs()
             [npcKeys.zoneID] = zoneIDs.DEADWIND_PASS,
             [npcKeys.spawns] = {
                 [zoneIDs.DEADWIND_PASS] = {{43,29}},
+            },
+        },
+        [221210] = { -- Kroll Mountainshade
+            [npcKeys.spawns] = {
+                [zoneIDs.DUSKWOOD] = {{66.11, 69.28}},
+            },
+        },
+        [221215] = { -- Alara Grovemender
+            [npcKeys.spawns] = {
+                [zoneIDs.DUSKWOOD] = {{49.15, 77.55}},
+            },
+        },
+        [221216] = { -- Elenora Marshwalker
+            [npcKeys.spawns] = {
+                [zoneIDs.DUSKWOOD] = {{32.39, 69.48}},
+            },
+        },
+        [221268] = { -- Doran Dreambough
+            [npcKeys.spawns] = {
+                [zoneIDs.ASHENVALE] = {{87.23, 43.56}},
+            },
+        },
+        [221269] = { -- Maseara Autumnmoon
+            [npcKeys.spawns] = {
+                [zoneIDs.ASHENVALE] = {{81.2, 50.5}},
+            },
+        },
+        [221270] = { -- Alyssian Windcaller
+            [npcKeys.spawns] = {
+                [zoneIDs.ASHENVALE] = {{92, 54.0}},
+            },
+        },
+        [221335] = { -- Elianar Shadowdrinker
+            [npcKeys.spawns] = {
+                [zoneIDs.THE_HINTERLANDS] = {{53.47, 39.05}},
+            },
+        },
+        [221336] = { -- Serlina Starbright
+            [npcKeys.spawns] = {
+                [zoneIDs.THE_HINTERLANDS] = {{71.11, 47.98}},
+            },
+        },
+        [221337] = { -- Veanna Cloudsleeper
+            [npcKeys.spawns] = {
+                [zoneIDs.THE_HINTERLANDS] = {{57.29, 42.80}},
+            },
+        },
+        [221395] = { -- Mellias Earthtender
+            [npcKeys.spawns] = {
+                [zoneIDs.FERALAS] = {{49.65, 15.35}},
+            },
+        },
+        [221398] = { -- Nerene Brooksinger
+            [npcKeys.spawns] = {
+                [zoneIDs.FERALAS] = {{46.00, 16.50}},
+            },
+        },
+        [221399] = { -- Jamniss Treemender
+            [npcKeys.spawns] = {
+                [zoneIDs.FERALAS] = {{40.62, 8.08}},
+            },
+        },
+        [221484] = { -- Scout Thandros
+            [npcKeys.spawns] = {
+                [zoneIDs.FERALAS] = {{51.06,10.54}},
+            },
+        },
+        [222188] = { -- Shadowy Figure
+            [npcKeys.spawns] = {
+                [zoneIDs.MOONGLADE] = {{52.12,40.89}},
             },
         },
 

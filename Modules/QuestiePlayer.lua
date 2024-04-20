@@ -187,3 +187,5 @@ function QuestiePlayer:GetPartyMemberList()
     end
     return members
 end
+
+return QuestiePlayer

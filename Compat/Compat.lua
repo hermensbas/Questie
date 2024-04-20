@@ -330,6 +330,9 @@ QuestieCompat.C_QuestLog = {
     GetMaxNumQuestsCanAccept = function()
         return MAX_QUESTLOG_QUESTS
     end,
+    IsOnQuest = function(questId)
+        return QuestieCompat.GetQuestLogIndexByID(questId) and true or false
+    end,
 }
 
 -- Can't find anything about this function.
