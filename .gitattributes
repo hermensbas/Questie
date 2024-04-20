@@ -13,3 +13,13 @@
 *.exe binary
 *.tga binary
 *.blp binary
+
+# Files and directories with the attribute export-ignore won’t be added to archive files
+.* export-ignore
+*.py export-ignore
+*.sh export-ignore
+*.test.lua export-ignore
+setupTests.lua export-ignore
+cli/ export-ignore
+ExternalScripts(DONOTINCLUDEINRELEASE)/ export-ignore
+Compat/ExtractMapData/ export-ignore
