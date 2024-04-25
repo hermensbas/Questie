@@ -230,7 +230,9 @@ function QuestieFramePool:CreateLine(iconFrame, startX, startY, endX, endY, line
     --Setting the parent is required to get the correct frame levels.
 
     lineFrame:SetParent(canvas) --This fixes the pan and zoom for lines
-    if not QuestieCompat.Is335 then
+    if QuestieCompat.Is335 then
+        lineFrame.CreateLine = QuestieCompat.CreateLine
+    else
         lineFrame:SetFrameLevel(2015) -- This needs to be high, because of the regular WorldMapFrame.ScrollContainer
         lineFrame:SetFrameStrata("FULLSCREEN")
     end
@@ -264,7 +266,7 @@ function QuestieFramePool:CreateLine(iconFrame, startX, startY, endX, endY, line
         HBDPins:RemoveWorldMapIcon(Questie, self)
         tinsert(QuestieFramePool.Routes_Lines, self);
     end
-    local line = lineFrame.line or (QuestieCompat.Is335 and QuestieCompat.CreateLine(lineFrame) or lineFrame:CreateLine());
+    local line = lineFrame.line or lineFrame:CreateLine();
     lineFrame.line = line;
 
     line.dR = color[1];
@@ -273,7 +275,7 @@ function QuestieFramePool:CreateLine(iconFrame, startX, startY, endX, endY, line
     line.dA = color[4];
     line:SetColorTexture(color[1],color[2],color[3],color[4]);
 
-    local lineBorder = lineFrame.lineBorder or (QuestieCompat.Is335 and QuestieCompat.CreateLine(lineFrame, true) or lineFrame:CreateLine());
+    local lineBorder = lineFrame.lineBorder or lineFrame:CreateLine();
     lineFrame.lineBorder = lineBorder;
 
     lineBorder.dR = color[1];

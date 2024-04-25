@@ -50,7 +50,7 @@ function QuestieOptions:Initialize()
     coroutine.yield()
 
     local journeyButton = CreateFrame("Button", nil, configFrame.frame, "UIPanelButtonTemplate")
-    journeyButton:SetWidth(140)
+    journeyButton:SetSize(140, 24)
     journeyButton:SetPoint("TOPRIGHT", configFrame.frame, "TOPRIGHT", -50, -13)
     journeyButton:SetText(l10n('My Journey'))
     journeyButton:SetScript("OnClick", function()

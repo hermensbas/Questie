@@ -215,9 +215,6 @@ QuestieInit.Stages[1] = function() -- run as a coroutine
         QuestieCorrections:MinimalInit()
     end
 
-    Tutorial.Initialize()
-    coYield()
-
     local dbCompiledCount = Questie.IsSoD and Questie.db.global.sod.dbCompiledCount or Questie.db.global.dbCompiledCount
 
     if (not Questie.db.char.townsfolk) or (dbCompiledCount ~= Questie.db.char.townsfolkVersion) or (Questie.db.char.townsfolkClass ~= UnitClass("player")) then
@@ -228,6 +225,9 @@ QuestieInit.Stages[1] = function() -- run as a coroutine
 
     coYield()
     QuestieDB:Initialize()
+
+    coYield()
+    Tutorial.Initialize()
 
     --? Only run the validator on recompile if debug is enabled, otherwise it's a waste of time.
     if Questie.db.profile.debugEnabled and dbCompiled then

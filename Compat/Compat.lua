@@ -26,6 +26,8 @@ local QuestXP = QuestieLoader:ImportModule("QuestXP")
 local QuestieCoords = QuestieLoader:ImportModule("QuestieCoords")
 ---@class Sounds
 local Sounds = QuestieLoader:ImportModule("Sounds")
+---@class QuestieMenu
+local QuestieMenu = QuestieLoader:ImportModule("QuestieMenu")
 
 -- addon/folder name
 QuestieCompat.addonName = ...
@@ -33,6 +35,7 @@ QuestieCompat.addonName = ...
 QuestieCompat.NOOP = function() end
 QuestieCompat.NOOP_MT = {__index = function() return QuestieCompat.NOOP end}
 
+-- events handler
 QuestieCompat.frame = CreateFrame("Frame")
 QuestieCompat.frame:RegisterEvent("ADDON_LOADED")
 QuestieCompat.frame:RegisterEvent("PLAYER_LOGIN")
@@ -42,9 +45,9 @@ QuestieCompat.frame:SetScript("OnEvent", function(self, event, ...)
 end)
 
 -- current expansion level (https://wowpedia.fandom.com/wiki/WOW_PROJECT_ID)
-QuestieCompat.WOW_PROJECT_CLASSIC = 1
-QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC = 2
-QuestieCompat.WOW_PROJECT_WRATH_CLASSIC = 3
+QuestieCompat.WOW_PROJECT_CLASSIC = 1 -- 2
+QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC = 2 -- 5
+QuestieCompat.WOW_PROJECT_WRATH_CLASSIC = 3 -- 11
 QuestieCompat.WOW_PROJECT_ID = tonumber(GetAddOnMetadata(QuestieCompat.addonName, "X-WOW_PROJECT_ID"))
 
 -- check for a specific type of group
@@ -174,6 +177,10 @@ QuestieCompat.C_Timer = {
 }
 
 local mapIdToUiMapId = {}
+-- convert current mapAreaID and mapLevel to UiMapId
+-- https://wowpedia.fandom.com/wiki/API_GetCurrentMapAreaID
+-- https://wowwiki-archive.fandom.com/wiki/API_GetCurrentMapDungeonLevel
+-- https://wowpedia.fandom.com/wiki/UiMapID#Classic
 function QuestieCompat.GetCurrentUiMapID()
     local mapID = GetCurrentMapAreaID()
     if mapID == 0 then -- both the "Cosmic" and "Azeroth" maps return a mapID of 0
@@ -182,6 +189,9 @@ function QuestieCompat.GetCurrentUiMapID()
     return mapIdToUiMapId[mapID + GetCurrentMapDungeonLevel()/10]
 end
 
+-- This function will do its utmost to retrieve some sort of valid position
+-- for the player, including changing the current map zoom (if needed)
+-- https://wowpedia.fandom.com/wiki/API_C_Map.GetPlayerMapPosition?oldid=2167175
 function QuestieCompat.GetCurrentPlayerPosition()
 	local x, y = GetPlayerMapPosition("player");
 	if ( x <= 0 and y <= 0 ) then
@@ -211,6 +221,7 @@ function QuestieCompat.GetCurrentPlayerPosition()
 	return QuestieCompat.GetCurrentUiMapID(), x, y;
 end
 
+-- wrapper used by QuestieCoords
 local playerPos = {}
 function QuestieCompat.GetPlayerMapPosition()
     playerPos.uiMapID, playerPos.x, playerPos.y = QuestieCompat.GetCurrentPlayerPosition()
@@ -245,6 +256,7 @@ QuestieCompat.C_Map = {
 	end,
 }
 
+-- https://www.townlong-yak.com/framexml/classic/Blizzard_MapCanvas/Blizzard_MapCanvas.lua
 QuestieCompat.WorldMapFrame = {
     IsVisible = function(self)
         return WorldMapFrame:IsVisible()
@@ -319,8 +331,8 @@ QuestieCompat.C_QuestLog = {
 		    	    	text = description,
 		    	    	type = objectiveType,
 		    	    	finished = isCompleted and true or false,
-		    	    	numFulfilled = tonumber(numFulfilled),
-		    	    	numRequired = tonumber(numRequired),
+		    	    	numFulfilled = tonumber(numFulfilled) or (isCompleted and 1 or 0),
+		    	    	numRequired = tonumber(numRequired) or 1,
 		    	    })
                 end
 		    end
@@ -347,6 +359,12 @@ end
 function QuestieCompat.GetQuestLogTitle(questLogIndex)
     local questTitle, level, questTag, suggestedGroup, isHeader, isCollapsed,
         isComplete, isDaily, questID = GetQuestLogTitle(questLogIndex);
+
+    if (isComplete == nil) then
+        local numObjectives = GetNumQuestLeaderBoards(questLogIndex);
+        local requiredMoney = GetQuestLogRequiredMoney(questLogIndex);
+        isComplete = (numObjectives == 0 and GetMoney() >= requiredMoney) and 1 or nil
+    end
     return questTitle, level, suggestedGroup, isHeader, isCollapsed, isComplete, isDaily and 2 or 1, questID
 end
 
@@ -663,6 +681,7 @@ function QuestieCompat.GetClassColor(classFilename)
 	return 1, 1, 1, "ffffffff";
 end
 
+-- handle tooltip based on the parent frame
 function QuestieCompat.SetupTooltip(frame, OnHide)
     if (frame:GetParent() == WorldMapFrame) then
         WorldMapPOIFrame.allowBlobTooltip = OnHide and true or false
@@ -673,6 +692,7 @@ function QuestieCompat.SetupTooltip(frame, OnHide)
     return QuestieCompat.Tooltip
 end
 
+-- tooltip word wrapping looks fine the way it is, leave it for now
 local empty_table = {}
 function QuestieCompat.TextWrap(self, line, prefix, combineTrailing, desiredWidth)
     QuestieCompat.Tooltip:AddLine(line, 0.86, 0.86, 0.86, 1);
@@ -682,6 +702,7 @@ end
 local unboundedFS = UIParent:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 unboundedFS:SetPoint("TOPLEFT", 0, 0)
 unboundedFS:Hide()
+
 -- The minimum width necessary to contain the entire text without truncation
 -- https://wowpedia.fandom.com/wiki/API_FontString_GetStringWidth
 function QuestieCompat.GetUnboundedStringWidth(self)
@@ -692,7 +713,7 @@ function QuestieCompat.GetUnboundedStringWidth(self)
     return unboundedFS:GetStringWidth()
 end
 
--- ???
+-- Number of lines of wrapped text
 -- https://wowpedia.fandom.com/wiki/API_FontString_GetNumLines
 function QuestieCompat.GetNumLines(self)
     local fontName, fontHeight, fontFlags = self:GetFont()
@@ -700,9 +721,15 @@ function QuestieCompat.GetNumLines(self)
     unboundedFS:SetFont(fontName, fontHeight, fontFlags)
     unboundedFS:SetText(self:GetText())
 
-	return math.floor(unboundedFS:GetHeight()/fontHeight)
+	return math.ceil(unboundedFS:GetHeight()/fontHeight)
 end
 
+-- texture			- Texture
+-- canvasFrame      - Canvas Frame (for anchoring)
+-- startX,startY    - Coordinate of start of line
+-- endX,endY		- Coordinate of end of line
+-- lineWidth        - Width of line
+-- relPoint			- Relative point on canvas to interpret coords (Default BOTTOMLEFT)
 local function DrawLine(texture, canvasFrame, startX, startY, endX, endY, lineWidth, lineFactor, relPoint)
 	if (not relPoint) then relPoint = "BOTTOMLEFT"; end
 	lineFactor = lineFactor * .5;
@@ -769,6 +796,7 @@ local function DrawLine(texture, canvasFrame, startX, startY, endX, endY, lineWi
 	texture:SetPoint("TOPRIGHT",   canvasFrame, relPoint, cx + boundingWidth, cy + boundingHeight);
 end
 
+-- Mix this into a Texture to be able to treat it like a line
 local LineMixin = {};
 
 function LineMixin:SetStartPoint(relPoint, x, y)
@@ -797,10 +825,11 @@ local function drawLineOnShow(self)
 end
 
 local stub_line = setmetatable({}, QuestieCompat.NOOP_MT)
-function QuestieCompat.CreateLine(lineFrame, stub)
-    if stub then return stub_line end
+-- https://wowpedia.fandom.com/wiki/API_Frame_CreateLine
+function QuestieCompat.CreateLine(self)
+    if self.line then return stub_line end -- stub lineBorder, as our line texture already has border
 
-    local line = lineFrame:CreateTexture(nil, "OVERLAY")
+    local line = self:CreateTexture(nil, "OVERLAY")
     line:SetTexture(QuestieLib.AddonPath.."Compat\\Waypoint-Line.blp")
     line.SetColorTexture = line.SetVertexColor
 
@@ -808,7 +837,7 @@ function QuestieCompat.CreateLine(lineFrame, stub)
         line[k] = v
     end
 
-    lineFrame:SetScript("OnShow", drawLineOnShow)
+    self:SetScript("OnShow", drawLineOnShow)
 
     return line
 end
@@ -966,6 +995,7 @@ local chatMessagePattern = {
     }
 }
 
+-- parse chat message for quest related info
 function QuestieCompat.UiInfoMessage(event, message)
     for _, pattern in pairs(chatMessagePattern.questInfo) do
         if string.find(message, pattern) then
@@ -974,6 +1004,7 @@ function QuestieCompat.UiInfoMessage(event, message)
     end
 end
 
+-- parse chat message for player looting an item
 local playerName = UnitName("player")
 function QuestieCompat.ChatMessageLoot(message)
     for _, pattern in pairs(chatMessagePattern.playerLoot) do
@@ -983,6 +1014,7 @@ function QuestieCompat.ChatMessageLoot(message)
     end
 end
 
+-- handle remote questlog of the party/raid
 function QuestieCompat.GroupRosterUpdate(event)
     local currentMembers = QuestieCompat.IsInRaid() and GetNumRaidMembers() or GetNumPartyMembers()
     -- Only want to do logic when number increases, not decreases.
@@ -1003,6 +1035,9 @@ function QuestieCompat.GroupRosterUpdate(event)
 end
 
 function QuestieCompat.QuestieEventHandler_RegisterLateEvents()
+    -- https://wowpedia.fandom.com/wiki/GROUP_ROSTER_UPDATE
+    -- https://wowpedia.fandom.com/wiki/GROUP_JOINED
+    -- https://wowpedia.fandom.com/wiki/GROUP_LEFT
     Questie:RegisterEvent("PARTY_MEMBERS_CHANGED", QuestieCompat.GroupRosterUpdate)
     Questie:RegisterBucketEvent("RAID_ROSTER_UPDATE", 1, QuestieCompat.GroupRosterUpdate)
 
@@ -1027,6 +1062,7 @@ end
 
 function QuestieCompat.QuestEventHandler_RegisterEvents()
     local _QuestEventHandler = QuestEventHandler.private
+    -- https://wowpedia.fandom.com/wiki/PLAYER_INTERACTION_MANAGER_FRAME_HIDE
     for _, event in pairs({
         "TRADE_CLOSED",
         "MERCHANT_CLOSED",
@@ -1041,6 +1077,7 @@ function QuestieCompat.QuestEventHandler_RegisterEvents()
     end
     QuestieCompat.frame:RegisterEvent("QUEST_QUERY_COMPLETE")
 
+    -- https://wowpedia.fandom.com/wiki/QUEST_TURNED_IN
     hooksecurefunc("GetQuestReward", function(itemChoice)
         local questId = QuestieCompat.GetQuestID()
         _QuestEventHandler:QuestTurnedIn(questId)
@@ -1051,6 +1088,7 @@ function QuestieCompat.QuestEventHandler_RegisterEvents()
         QuestieCompat.abandonQuestID = select(9, GetQuestLogTitle(GetQuestLogSelection()))
     end)
 
+    --https://wowpedia.fandom.com/wiki/QUEST_REMOVED
     hooksecurefunc("AbandonQuest", function()
         local questId = QuestieCompat.abandonQuestID or select(9, GetQuestLogTitle(GetQuestLogSelection()))
         _QuestEventHandler:QuestRemoved(QuestieCompat.abandonQuestID)
@@ -1087,16 +1125,30 @@ function QuestieCompat.PopulateGlobals(self)
     end
 end
 
+-- change sound files extension from .ogg to .wav
 function QuestieCompat.GetSelectedSoundFile(typeSelected)
     return QuestieCompat.orig_GetSelectedSoundFile(typeSelected):gsub("[^.]+$", "wav")
 end
 
+-- disable builtin quest progress tooltips, re-enable on logout
 function QuestieCompat:ToggleQuestTrackingTooltips(event)
     local value = tostring(event:find("LOGOUT") and 1 or 0)
     SetCVar("showQuestTrackingTooltips", value)
 end
 QuestieCompat.PLAYER_LOGIN = QuestieCompat.ToggleQuestTrackingTooltips
 QuestieCompat.PLAYER_LOGOUT = QuestieCompat.ToggleQuestTrackingTooltips
+
+local townsfolk_texturemap = {
+    ["Ammo"] = "Interface\\Icons\\inv_ammo_arrow_02",
+    ["Bags"] = "Interface\\Icons\\inv_misc_bag_09",
+    ["Potions"] = "Interface\\Icons\\inv_potion_51",
+    ["Trade Goods"] ="Interface\\Icons\\inv_fabric_wool_02",
+    ["Drink"] = "Interface\\Icons\\inv_potion_01",
+    ["Food"] = "Interface\\Icons\\inv_misc_food_11",
+    ["Pet Food"] = "Interface\\Icons\\ability_hunter_beasttraining",
+    ["Spirit Healer"] = "Interface\\Addons\\"..QuestieCompat.addonName.."\\Compat\\Raid-Icon-Rez.blp",
+    ["Portal Trainer"] = "Interface\\Addons\\"..QuestieCompat.addonName.."\\Compat\\Vehicle-AllianceMagePortal.blp",
+}
 
 StaticPopupDialogs["QUESTIE_RELOAD"] = {
     text = "Changes you have made require a UI reload",
@@ -1119,6 +1171,7 @@ function QuestieCompat.QuestieOptions_Initialize()
 
     local optionsTable = LibStub("AceConfigRegistry-3.0"):GetOptionsTable("Questie", "dialog", "MyLib-1.0")
 
+    -- revert instant quest text to old cvar
     optionsTable.args.general_tab.args.interface_options_group.args.instantQuest.get = function()
         return GetCVar("questFadingDisable") == '1' and true or false
     end
@@ -1127,12 +1180,14 @@ function QuestieCompat.QuestieOptions_Initialize()
         SetCVar("questFadingDisable", tostring(value and 1 or 0))
     end
 
+    -- disable settings for not implemented functionality
     Questie.db.profile.hideUnexploredMapIcons = false
     optionsTable.args.icons_tab.args.map_settings_group.args.hideUnexploredMapIconsToggle.disabled = true
 
     Questie.db.profile.nameplateEnabled = false
     optionsTable.args.nameplate_tab.args.nameplate_options_group.disabled = true
 
+    -- 3.3.5 section
     optionsTable.args.advanced_tab.args.compat_header = {
         type = "header",
         order = 6,
@@ -1158,11 +1213,10 @@ function QuestieCompat.QuestieOptions_Initialize()
     optionsTable.args.advanced_tab.args.initDelay = {
         type = "range",
         order = 6.2,
-        name = "Reduce init rate",
-        desc = "Reduce init rate",
+        name = "Init rate delay",
+        desc = "Init rate delay",
         width = 1.5,
-        isPercent = true,
-        min = 0,
+        min = 0.1,
         max = 1,
         step = 0.01,
         hidden = function() return not Questie.db.profile.debugEnabled; end,
@@ -1189,6 +1243,10 @@ function QuestieCompat:ADDON_LOADED(event, addon)
         for i, str in pairs(patterns) do
             chatMessagePattern[k][i] = QuestieLib:SanitizePattern(str)
         end
+    end
+
+    for name, path in pairs(townsfolk_texturemap) do
+        QuestieMenu.private.townsfolk_texturemap[name] = path
     end
 
     for _, moduleName in pairs({

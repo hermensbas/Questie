@@ -150,7 +150,10 @@ function TrackerUtils:FlashObjective(objective)
                         icon:Hide()
                         if icon.data.lineFrames then
                             for _, line in pairs(icon.data.lineFrames) do
-                                line:Hide()
+                                if line:IsShown() then
+                                    line._hidden_by_flash = true
+                                    line:Hide()
+                                end
                             end
                         end
                     end
@@ -214,7 +217,10 @@ function TrackerUtils:FlashObjective(objective)
                                             icon:Show()
                                             if icon.data.lineFrames then
                                                 for _, line in pairs(icon.data.lineFrames) do
-                                                    line:Show()
+                                                    if line._hidden_by_flash then
+                                                        line._hidden_by_flash = nil
+                                                        line:Show()
+                                                    end
                                                 end
                                             end
                                         end
@@ -245,7 +251,10 @@ function TrackerUtils:FlashFinisher(quest)
                         icon:Hide()
                         if icon.data.lineFrames then
                             for _, line in pairs(icon.data.lineFrames) do
-                                line:Hide()
+                                if line:IsShown() then
+                                    line._hidden_by_flash = true
+                                    line:Hide()
+                                end
                             end
                         end
                     end
@@ -303,7 +312,10 @@ function TrackerUtils:FlashFinisher(quest)
                                         icon:Show()
                                         if icon.data.lineFrames then
                                             for _, line in pairs(icon.data.lineFrames) do
-                                                line:Show()
+                                                if line._hidden_by_flash then
+                                                    line._hidden_by_flash = nil
+                                                    line:Show()
+                                                end
                                             end
                                         end
                                     end
