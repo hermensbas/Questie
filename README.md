@@ -1,3 +1,10 @@
+# Questie-335
+A fork of the WoW Classic Questie addon aiming to provide compatibility with Wrath of the Lich King client version 3.3.5a (12340).
+# Installation
+- [Download](https://github.com/widxwer/Questie/archive/refs/heads/335.zip) the archive.
+- Extract it into `Interface/AddOns/` directory, folder name should be `Questie-335`.
+- If you are playing on a custom server that emulates a previous expansion using the 3.3.5 client, you could add `-Classic` or `-TBC` to the addon folder name to load only the required files for the chosen expansion. In case your server doesn't provide a patch for a world map, you need to enable the in-game setting: `Options/Advanced/Use WotLK map data`.
+
 # Questie
 
 [![Discord](https://img.shields.io/badge/discord-Questie-738bd7)](https://discord.gg/s33MAYKeZd)

@@ -1192,7 +1192,6 @@ function QuestieCompat.QuestieOptions_Initialize()
         type = "header",
         order = 6,
         name = "3.3.5 Compatibility Settings",
-        hidden = function() return not Questie.db.profile.debugEnabled; end,
     }
 
     optionsTable.args.advanced_tab.args.useWotlkMapData = {
@@ -1201,7 +1200,6 @@ function QuestieCompat.QuestieOptions_Initialize()
         name = "Use WotLK map data",
         desc = "Use WotLK map data",
         width = 1.8,
-        hidden = function() return not Questie.db.profile.debugEnabled; end,
         disabled = function() return QuestieCompat.WOW_PROJECT_ID == QuestieCompat.WOW_PROJECT_WRATH_CLASSIC end,
         get = function (info) return QuestieOptions:GetProfileValue(info); end,
         set = function (info, value)
