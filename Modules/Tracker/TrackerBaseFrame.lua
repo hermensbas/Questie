@@ -29,7 +29,7 @@ TrackerBaseFrame.isMoving = false
 local _OnEnter, _SetSizerTooltip
 
 function TrackerBaseFrame.Initialize()
-    baseFrame = CreateFrame("Frame", "Questie_BaseFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+    baseFrame = CreateFrame("Frame", "Questie_BaseFrame", UIParent, not QuestieCompat.Is335 and (BackdropTemplateMixin and "BackdropTemplate"))
     baseFrame:SetClampedToScreen(true) -- We don't want this frame to be able to move off screen at all!
     baseFrame:SetFrameStrata("MEDIUM")
     baseFrame:SetFrameLevel(0)

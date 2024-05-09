@@ -35,6 +35,8 @@ function QuestieFramePool.Qframe:New(frameId, OnEnter)
     if MBB_Ignore then
         tinsert(MBB_Ignore, newFrame:GetName())
     end
+    newFrame.isSkinned = true -- prevents ElvUI_Enhanced_MinimapButtonGrabber from hidding our pins
+
     if frameId > 5000 then
         Questie:Debug(Questie.DEBUG_CRITICAL, "[QuestieFramePool] Over 5000 frames... maybe there is a leak?", frameId)
     end

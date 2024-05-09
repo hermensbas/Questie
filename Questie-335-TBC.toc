@@ -13,7 +13,7 @@
 ## SavedVariablesPerCharacter: QuestieConfigCharacter
 ## X-Curse-Project-ID: 334372
 ## X-Wago-ID: qv634BKb
-## X-WOW_PROJECT_ID: 2
+## X-WOW_PROJECT_ID: 5
 
 # Loader module
 Modules\Libs\QuestieLoader.lua

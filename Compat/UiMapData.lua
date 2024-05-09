@@ -1,5 +1,17 @@
 QuestieCompat.UiMapData =
 {
+    [946] =
+    {
+        [1] = 0,
+        [2] = 0,
+        [3] = 0,
+        [4] = 0,
+        ["mapType"] = 0,
+        ["parentMapID"] = 0,
+        ["mapID"] = -1,
+        ["instance"] = -1,
+        ["name"] = "Cosmic",
+    },
     [947] =
 	{
 		[1] = -3065.623046875,
@@ -632,23 +644,11 @@ QuestieCompat.worldMapData = {
 }
 
 
-function QuestieCompat.LoadUiMapData(force)
-    if (force or QuestieCompat.WOW_PROJECT_ID) < 2 then return end
+function QuestieCompat.LoadUiMapData(expansionLevel)
+    if (expansionLevel or QuestieCompat.WOW_PROJECT_ID) < QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC then return end
 
     local UiMapData =
     {
-        [946] =
-        {
-            [1] = 0,
-            [2] = 0,
-            [3] = 0,
-            [4] = 0,
-            ["mapType"] = 0,
-            ["parentMapID"] = 0,
-            ["mapID"] = -1,
-            ["instance"] = -1,
-            ["name"] = "Cosmic",
-        },
         [947] =
         {
             [1] = -31823.46875,
@@ -875,7 +875,7 @@ function QuestieCompat.LoadUiMapData(force)
     QuestieCompat.worldMapData[0] = { 44688.53, 29791.24, 32681.47, 11479.44 }
     QuestieCompat.worldMapData[1] = { 44878.66, 29916.10,  8723.96, 14824.53 }
 
-    if (force or QuestieCompat.WOW_PROJECT_ID) < 3 then return end
+    if (expansionLevel or QuestieCompat.WOW_PROJECT_ID) < QuestieCompat.WOW_PROJECT_WRATH_CLASSIC then return end
 
     local UiMapData =
     {

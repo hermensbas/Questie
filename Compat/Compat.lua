@@ -35,6 +35,8 @@ QuestieCompat.addonName = ...
 QuestieCompat.NOOP = function() end
 QuestieCompat.NOOP_MT = {__index = function() return QuestieCompat.NOOP end}
 
+local EMPTY_TABLE, EMPTY_STRING = {}, ""
+
 -- events handler
 QuestieCompat.frame = CreateFrame("Frame")
 QuestieCompat.frame:RegisterEvent("ADDON_LOADED")
@@ -45,9 +47,9 @@ QuestieCompat.frame:SetScript("OnEvent", function(self, event, ...)
 end)
 
 -- current expansion level (https://wowpedia.fandom.com/wiki/WOW_PROJECT_ID)
-QuestieCompat.WOW_PROJECT_CLASSIC = 1 -- 2
-QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC = 2 -- 5
-QuestieCompat.WOW_PROJECT_WRATH_CLASSIC = 3 -- 11
+QuestieCompat.WOW_PROJECT_CLASSIC = 2
+QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC = 5
+QuestieCompat.WOW_PROJECT_WRATH_CLASSIC = 11
 QuestieCompat.WOW_PROJECT_ID = tonumber(GetAddOnMetadata(QuestieCompat.addonName, "X-WOW_PROJECT_ID"))
 
 -- check for a specific type of group
@@ -186,7 +188,7 @@ function QuestieCompat.GetCurrentUiMapID()
     if mapID == 0 then -- both the "Cosmic" and "Azeroth" maps return a mapID of 0
         mapID = GetCurrentMapContinent()
     end
-    return mapIdToUiMapId[mapID + GetCurrentMapDungeonLevel()/10]
+    return mapIdToUiMapId[mapID + GetCurrentMapDungeonLevel()/10] or 946
 end
 
 -- This function will do its utmost to retrieve some sort of valid position
@@ -693,10 +695,9 @@ function QuestieCompat.SetupTooltip(frame, OnHide)
 end
 
 -- tooltip word wrapping looks fine the way it is, leave it for now
-local empty_table = {}
 function QuestieCompat.TextWrap(self, line, prefix, combineTrailing, desiredWidth)
     QuestieCompat.Tooltip:AddLine(line, 0.86, 0.86, 0.86, 1);
-    return empty_table
+    return EMPTY_TABLE
 end
 
 local unboundedFS = UIParent:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -1012,6 +1013,7 @@ function QuestieCompat.ChatMessageLoot(message)
             return playerName
         end
     end
+    return EMPTY_STRING
 end
 
 -- handle remote questlog of the party/raid
@@ -1276,4 +1278,9 @@ function QuestieCompat:ADDON_LOADED(event, addon)
     hooksecurefunc(QuestEventHandler, "RegisterEvents", QuestieCompat.QuestEventHandler_RegisterEvents)
     hooksecurefunc(TrackerLinePool, "Initialize", QuestieCompat.QuestieTracker_Initialize)
     hooksecurefunc(QuestieQuest, "ToggleNotes", QuestieCompat.HBDPins.UpdateWorldMap)
+
+    local Mapster = LibStub("AceAddon-3.0"):GetAddon("Mapster", true)
+    if Mapster and Mapster.RefreshQuestObjectivesDisplay then
+        hooksecurefunc(Mapster, "RefreshQuestObjectivesDisplay", QuestieCompat.HBDPins.UpdateWorldMap)
+    end
 end
