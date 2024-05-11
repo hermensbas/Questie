@@ -328,7 +328,7 @@ QuestieCompat.C_QuestLog = {
 		    	-- https://wowpedia.fandom.com/wiki/API_GetQuestLogLeaderBoard
 		    	local description, objectiveType, isCompleted = GetQuestLogLeaderBoard(i, questLogIndex);
                 if objectiveType ~= "log" then
-		    	    local objectiveName, numFulfilled, numRequired = string.match(description, "(.*):%s*([%d]+)%s*/%s*([%d]+)");
+		    	    local objectiveName, numFulfilled, numRequired = string.match(string.gsub(description, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)");
 		    	    table.insert(questObjectives, {
 		    	    	text = description,
 		    	    	type = objectiveType,
