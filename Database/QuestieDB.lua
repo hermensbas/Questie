@@ -636,6 +636,11 @@ function QuestieDB.IsDoable(questId, debugPrint)
         return false
     end
 
+    if C_QuestLog.IsOnQuest(questId) == true then
+        if debugPrint then Questie:Debug(Questie.DEBUG_SPAM, "[QuestieDB.IsDoable] Quest " .. questId .. " is eligible because Player is on the quest!") end
+        return true
+    end
+
     if QuestieDB.activeChildQuests[questId] then -- The parent quest is active, so this quest is doable
         if debugPrint then Questie:Debug(Questie.DEBUG_SPAM, "[QuestieDB.IsDoable] Quest " .. questId .. " is eligible because it's a child quest and the parent is active!") end
         return true

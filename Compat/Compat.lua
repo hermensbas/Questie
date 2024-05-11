@@ -603,10 +603,13 @@ end
 -- https://wowpedia.fandom.com/wiki/API_GetQuestID
 function QuestieCompat.GetQuestID(questStarter, title)
     local title = title or GetTitleText()
-    local questID = QuestieDB.GetQuestIDFromName(title, QuestieCompat.UnitGUID("target"), questStarter)
+    local guid = QuestieCompat.UnitGUID("target")
+
+    local questID = QuestieDB.GetQuestIDFromName(title, guid or QuestieCompat.UnitGUID("npc"), questStarter)
     if questID == 0 then
-        return QuestieDB.GetQuestIDFromName(title, QuestieCompat.UnitGUID("target"), not questStarter)
+        return QuestieDB.GetQuestIDFromName(title, guid or QuestieCompat.UnitGUID("npc"), not questStarter)
     end
+
 	return questID
 end
 
