@@ -496,6 +496,43 @@ function QuestieCompat.GetQuestTagInfo(questId)
 	end
 end
 
+-- Returns the ID of the displayed quest at a quest giver.
+-- https://wowpedia.fandom.com/wiki/API_GetQuestID
+function QuestieCompat.GetQuestID(questStarter, title)
+    local title = title or GetTitleText()
+    local guid = QuestieCompat.UnitGUID("npc")
+
+	return QuestieDB.GetQuestIDFromName(title, guid, questStarter)
+end
+
+-- https://wowwiki-archive.fandom.com/wiki/API_UnitGUID?oldid=2368080
+local GUIDType = {
+    [0]="Player",
+    [1]="GameObject",
+    [3]="Creature",
+    [4]="Pet",
+    [5]="Vehicle"
+}
+
+-- Returns the GUID of the unit.
+-- https://wowpedia.fandom.com/wiki/GUID
+-- Patch 6.0.2 (2014-10-14): Changed to a new format
+function QuestieCompat.UnitGUID(unit)
+    local guid = UnitGUID(unit)
+    if guid then
+        local type = tonumber(guid:sub(5,5), 16) % 8
+        if type and (type == 1 or type == 3 or type == 5) then
+            local id = tonumber(guid:sub(6, 12), 16)
+            -- Creature-0-[serverID]-[instanceID]-[zoneUID]-[npcID]-[spawnUID]
+            return string.format("%s-0-4170-0-41-%d-00000F4B37", GUIDType[type], id)
+        end
+    end
+end
+
+function QuestieCompat.GetMaxPlayerLevel()
+    return (Questie.IsWotlk and 80) or (Questie.IsTBC and 70) or (Questie.IsClassic and 60)
+end
+
 -- https://wowpedia.fandom.com/wiki/API_UnitAura?oldid=2681338
 -- Returns the buffs/debuffs for the unit.
 -- an alias for UnitAura(unit, index, "HELPFUL"), returning only buffs.
@@ -504,10 +541,6 @@ function QuestieCompat.UnitBuff(unit, index)
     local name, rank, icon, count, debuffType, duration, expirationTime,
         unitCaster, isStealable, shouldConsolidate, spellId = UnitBuff(unit, index)
     return name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, shouldConsolidate, spellId
-end
-
-function QuestieCompat.GetMaxPlayerLevel()
-    return (Questie.IsWotlk and 80) or (Questie.IsTBC and 70) or (Questie.IsClassic and 60)
 end
 
 -- Returns the race of the unit.
@@ -573,44 +606,6 @@ function QuestieCompat.GetHomePartyInfo(homePlayers)
 		end
 		return homePlayers
 	end
-end
-
--- https://wowpedia.fandom.com/wiki/API_UnitGUID?oldid=2507049
-local GUIDType = {
-    [0]="Player",
-    [1]="GameObject",
-    [3]="Creature",
-    [4]="Pet",
-    [5]="Vehicle"
-}
-
--- Returns the GUID of the unit.
--- https://wowpedia.fandom.com/wiki/GUID
--- Patch 6.0.2 (2014-10-14): Changed to a new format
-function QuestieCompat.UnitGUID(unit)
-    local guid = UnitGUID(unit)
-    if guid then
-        local type = tonumber(guid:sub(5,5), 16) % 8
-        if type and (type == 1 or type == 3 or type == 5) then
-            local id = tonumber(guid:sub(9, 12), 16)
-            -- Creature-0-[serverID]-[instanceID]-[zoneUID]-[npcID]-[spawnUID]
-            return string.format("%s-0-4170-0-41-%d-00000F4B37", GUIDType[type], id)
-        end
-    end
-end
-
--- Returns the ID of the displayed quest at a quest giver.
--- https://wowpedia.fandom.com/wiki/API_GetQuestID
-function QuestieCompat.GetQuestID(questStarter, title)
-    local title = title or GetTitleText()
-    local guid = QuestieCompat.UnitGUID("target")
-
-    local questID = QuestieDB.GetQuestIDFromName(title, guid or QuestieCompat.UnitGUID("npc"), questStarter)
-    if questID == 0 then
-        return QuestieDB.GetQuestIDFromName(title, guid or QuestieCompat.UnitGUID("npc"), not questStarter)
-    end
-
-	return questID
 end
 
 -- Gets a list of the auction house item classes.
@@ -1257,7 +1252,6 @@ function QuestieCompat:ADDON_LOADED(event, addon)
         "QuestieDebugOffer",
         "SeasonOfDiscovery",
         "QuestieDBMIntegration",
-        "Profiler",
     }) do
         local module = QuestieLoader:ImportModule(moduleName)
         setmetatable(module, QuestieCompat.NOOP_MT)

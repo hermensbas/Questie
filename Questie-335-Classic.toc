@@ -222,7 +222,7 @@ Modules\Options\TrackerTab\QuestieOptionsTracker.lua
 Modules\QuestieCleanup.lua
 
 # Profiler
-#Modules\QuestieProfiler.lua
+Modules\QuestieProfiler.lua
 
 # Main
 Questie.lua

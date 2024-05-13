@@ -440,7 +440,19 @@ function QuestieSearchResults:ItemDetailsFrame(f, itemId)
             itemLink = select(2, GetItemInfo(itemId))
         end
         GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
-        GameTooltip:SetHyperlink(itemLink)
+        if itemLink then
+            GameTooltip:SetHyperlink(itemLink)
+        elseif QuestieCompat.Is335 then
+            -- I don't know if this applies to private servers, but let's assume it does.
+            GameTooltip:AddLine("Item Unavailable", 1, 0, 0)
+            GameTooltip:AddLine("This item is unsafe.  To view this item without the risk of disconnection, you need to have first seen it in the game world. This is a restriction enforced by Blizzard since Patch 1.10.", nil, nil, nil, 1)
+            GameTooltip:AddLine(" ");
+            GameTooltip:AddLine("You can |cffFFFFFFLEFT-CLICK|r to attempt to query the server. You may be disconnected.", .75, .75, .75, 1)
+
+            itemIcon:SetCallback("OnClick", function()
+                GameTooltip:SetHyperlink("item:"..itemId..":0:0:0:0:0:0:0")
+            end)
+        end
         GameTooltip:Show()
     end)
     itemIcon:SetCallback("OnLeave", function()

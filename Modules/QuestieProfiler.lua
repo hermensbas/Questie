@@ -2,6 +2,7 @@ local QuestieProfiler = QuestieLoader:CreateModule("Profiler")
 
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
+local BackdropTemplateMixin = not QuestieCompat.Is335 and BackdropTemplateMixin
 
 QuestieProfiler.hooks = {}
 QuestieProfiler.alreadyHooked = {}
@@ -144,7 +145,7 @@ function QuestieProfiler:CreateUI()
     })
 
     local scrollFrameTemplete
-    if Questie.IsWotlk then
+    if Questie.IsWotlk and (not QuestieCompat.Is335) then
         scrollFrameTemplete = "ScrollFrameTemplate"
     else
         scrollFrameTemplete = "UIPanelScrollFrameTemplate"
@@ -154,6 +155,7 @@ function QuestieProfiler:CreateUI()
     base.scrollFrame:SetFrameStrata("TOOLTIP")
     base.scrollFrame:SetPoint("TOPLEFT", base, 0, -40)
     base.scrollFrame:SetPoint("BOTTOMRIGHT", base, 0, 30)
+    base.scrollFrame.ScrollBar = _G[base.scrollFrame:GetName() .. "ScrollBar"]
     base.scrollFrame.ScrollBar:Hide()
 
     base.scrollContainer = CreateFrame("Frame")
@@ -453,9 +455,9 @@ function QuestieProfiler:CreateUI()
     end
     search:SetAutoFocus(false)
     search:SetScript("OnEscapePressed", clearFocus)
-    search:HookScript("OnKeyUp", function()
+    search:HookScript(QuestieCompat.Is335 and "OnTextChanged" or "OnKeyUp", function(self, userInput)
         local txt = string.lower(search:GetText())
-        if string.len(txt) == 0 then
+        if string.len(txt) == 0 or userInput == false then
             txt = nil
         end
         QuestieProfiler.searchFilter = txt

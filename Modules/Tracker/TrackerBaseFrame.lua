@@ -17,6 +17,7 @@ local l10n = QuestieLoader:ImportModule("l10n")
 
 --- COMPATIBILITY ---
 local C_Timer = QuestieCompat.C_Timer
+local BackdropTemplateMixin = not QuestieCompat.Is335 and BackdropTemplateMixin
 
 local WatchFrame = QuestWatchFrame or WatchFrame
 local baseFrame, sizer, sizerSetPoint, sizerSetPointY, sizerLine1, sizerLine2, sizerLine3
@@ -29,7 +30,7 @@ TrackerBaseFrame.isMoving = false
 local _OnEnter, _SetSizerTooltip
 
 function TrackerBaseFrame.Initialize()
-    baseFrame = CreateFrame("Frame", "Questie_BaseFrame", UIParent, not QuestieCompat.Is335 and (BackdropTemplateMixin and "BackdropTemplate"))
+    baseFrame = CreateFrame("Frame", "Questie_BaseFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
     baseFrame:SetClampedToScreen(true) -- We don't want this frame to be able to move off screen at all!
     baseFrame:SetFrameStrata("MEDIUM")
     baseFrame:SetFrameLevel(0)
