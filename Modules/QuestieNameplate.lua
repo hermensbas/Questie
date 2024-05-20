@@ -1,6 +1,6 @@
 ---@class QuestieNameplate
 local QuestieNameplate = QuestieLoader:CreateModule("QuestieNameplate")
-local _QuestieNameplate = {}
+local _QuestieNameplate = QuestieNameplate.private
 -------------------------
 --Import modules.
 -------------------------
@@ -191,7 +191,7 @@ function _QuestieNameplate.GetFrame(guid)
         return npFrames[guid]
     end
 
-    local parent = C_NamePlate.GetNamePlateForUnit(activeGUIDs[guid])
+    local parent = QuestieCompat.Is335 and guid or C_NamePlate.GetNamePlateForUnit(activeGUIDs[guid])
 
     local frame = tremove(npUnusedFrames)
 
@@ -210,7 +210,7 @@ function _QuestieNameplate.GetFrame(guid)
     frame:SetParent(parent)
     frame:SetPoint("LEFT", Questie.db.profile.nameplateX, Questie.db.profile.nameplateY)
 
-    frame.Icon = frame:CreateTexture(nil, "ARTWORK")
+    frame.Icon = frame.Icon or frame:CreateTexture(nil, "ARTWORK")
     frame.Icon:ClearAllPoints()
     frame.Icon:SetAllPoints(frame)
 

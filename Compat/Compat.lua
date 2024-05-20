@@ -28,14 +28,17 @@ local QuestieCoords = QuestieLoader:ImportModule("QuestieCoords")
 local Sounds = QuestieLoader:ImportModule("Sounds")
 ---@class QuestieMenu
 local QuestieMenu = QuestieLoader:ImportModule("QuestieMenu")
+---@class QuestieTooltips
+local QuestieTooltips = QuestieLoader:ImportModule("QuestieTooltips")
+---@class QuestieNameplate
+local QuestieNameplate = QuestieLoader:ImportModule("QuestieNameplate")
+
 
 -- addon/folder name
 QuestieCompat.addonName = ...
 
 QuestieCompat.NOOP = function() end
 QuestieCompat.NOOP_MT = {__index = function() return QuestieCompat.NOOP end}
-
-local EMPTY_TABLE, EMPTY_STRING = {}, ""
 
 -- events handler
 QuestieCompat.frame = CreateFrame("Frame")
@@ -692,10 +695,11 @@ function QuestieCompat.SetupTooltip(frame, OnHide)
     return QuestieCompat.Tooltip
 end
 
+local wrappedLines = {}
 -- tooltip word wrapping looks fine the way it is, leave it for now
 function QuestieCompat.TextWrap(self, line, prefix, combineTrailing, desiredWidth)
     QuestieCompat.Tooltip:AddLine(line, 0.86, 0.86, 0.86, 1);
-    return EMPTY_TABLE
+    return wrappedLines
 end
 
 local unboundedFS = UIParent:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -973,6 +977,84 @@ function QuestieCompat.Save(self)
 	return result
 end
 
+local _QuestieNameplate = QuestieNameplate.private
+local npFrames = {}
+local npActiveQuestNPCs = {}
+local npBorderTexture = "Interface\\Tooltips\\Nameplate-Border"
+
+local function isNamePlate(frame)
+    if frame.UnitFrame  -- ElvUI
+    or frame.extended   -- TidyPlates
+    or frame.aloftData  -- Aloft
+    then return true end
+
+    local _, borderRegion = frame:GetRegions()
+    if borderRegion and borderRegion:GetObjectType() == "Texture" then
+        return borderRegion:GetTexture() == npBorderTexture
+    end
+
+    return false
+end
+
+local function scanWorldFrameChildren(frame, ...)
+	if not frame then return end
+
+	if not npFrames[frame] and isNamePlate(frame) then
+        npFrames[frame] = select(7, frame:GetRegions())
+
+        frame:HookScript("OnShow", QuestieCompat.NameplateCreated)
+        frame:HookScript("OnHide", _QuestieNameplate.RemoveFrame)
+
+        if frame:IsShown() then
+		    QuestieCompat.NameplateCreated(frame)
+        end
+	end
+	return scanWorldFrameChildren(...)
+end
+
+function QuestieCompat.NameplateCreated(frame)
+    local name = npFrames[frame]:GetText()
+    local key = npActiveQuestNPCs[name]
+    if key then
+        local icon = _QuestieNameplate.GetValidIcon(QuestieTooltips.lookupByKey[key])
+
+        if icon then
+            local f = _QuestieNameplate.GetFrame(frame)
+            f.Icon:SetTexture(icon)
+            f.lastIcon = icon -- this is used to prevent updating the texture when it's already what it needs to be
+            f:Show()
+        end
+    end
+end
+
+function QuestieCompat.UpdateNameplate()
+    for frame in pairs(npFrames) do
+        local name = npFrames[frame]:GetText()
+        local key = npActiveQuestNPCs[name]
+
+        local icon = _QuestieNameplate.GetValidIcon(QuestieTooltips.lookupByKey[key])
+
+        if icon then
+            local f = _QuestieNameplate.GetFrame(frame)
+            -- check if the texture needs to be changed
+            if f.lastIcon ~= icon then
+                f.lastIcon = icon
+                f.Icon:SetTexture(icon)
+            end
+        else
+            -- tooltip removed but we still have the frame active, remove it
+            _QuestieNameplate.RemoveFrame(frame)
+        end
+    end
+end
+
+function QuestieCompat:QuestieTooltips_RegisterObjectiveTooltip(questId, key, objective)
+    if key:find("m_") then
+        local name = QuestieDB.QueryNPCSingle(tonumber(key:sub(3)), "name")
+        npActiveQuestNPCs[name] = key
+    end
+end
+
 local _EventHandler = QuestieEventHandler.private
 local chatMessagePattern = {
     questInfo = {
@@ -1005,13 +1087,14 @@ end
 
 -- parse chat message for player looting an item
 local playerName = UnitName("player")
+local emptyName = ""
 function QuestieCompat.ChatMessageLoot(message)
     for _, pattern in pairs(chatMessagePattern.playerLoot) do
         if string.find(message, pattern) then
             return playerName
         end
     end
-    return EMPTY_STRING
+    return emptyName
 end
 
 -- handle remote questlog of the party/raid
@@ -1055,6 +1138,23 @@ function QuestieCompat.QuestieEventHandler_RegisterLateEvents()
             if modifierStateChanged then
                 _EventHandler:ModifierStateChanged(key, 0)
                 modifierStateChanged = nil
+            end
+        end)
+    end
+
+    -- https://wowpedia.fandom.com/wiki/NAME_PLATE_UNIT_ADDED
+    -- https://wowpedia.fandom.com/wiki/NAME_PLATE_UNIT_REMOVED
+    if Questie.db.profile.nameplateEnabled then
+        QuestieNameplate.UpdateNameplate = QuestieCompat.UpdateNameplate
+        hooksecurefunc(QuestieQuest, "GetAllQuestIds", QuestieCompat.UpdateNameplate)
+        hooksecurefunc(QuestieTooltips, "RegisterObjectiveTooltip", QuestieCompat.QuestieTooltips_RegisterObjectiveTooltip)
+
+        local lastNumChildren
+        QuestieCompat.C_Timer.NewTicker(0.1, function()
+            local numChildren = WorldFrame:GetNumChildren()
+            if numChildren ~= lastNumChildren then
+                lastNumChildren = numChildren
+                scanWorldFrameChildren(WorldFrame:GetChildren())
             end
         end)
     end
@@ -1180,12 +1280,14 @@ function QuestieCompat.QuestieOptions_Initialize()
         SetCVar("questFadingDisable", tostring(value and 1 or 0))
     end
 
+    optionsTable.args.nameplate_tab.args.nameplate_options_group.args.nameplateEnabled.set = function (info, value)
+        QuestieOptions:SetProfileValue(info, value)
+        StaticPopup_Show("QUESTIE_RELOAD")
+    end
+
     -- disable settings for not implemented functionality
     Questie.db.profile.hideUnexploredMapIcons = false
     optionsTable.args.icons_tab.args.map_settings_group.args.hideUnexploredMapIconsToggle.disabled = true
-
-    Questie.db.profile.nameplateEnabled = false
-    optionsTable.args.nameplate_tab.args.nameplate_options_group.disabled = true
 
     -- 3.3.5 section
     optionsTable.args.advanced_tab.args.compat_header = {

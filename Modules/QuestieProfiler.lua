@@ -155,7 +155,14 @@ function QuestieProfiler:CreateUI()
     base.scrollFrame:SetFrameStrata("TOOLTIP")
     base.scrollFrame:SetPoint("TOPLEFT", base, 0, -40)
     base.scrollFrame:SetPoint("BOTTOMRIGHT", base, 0, 30)
-    base.scrollFrame.ScrollBar = _G[base.scrollFrame:GetName() .. "ScrollBar"]
+
+    if QuestieCompat.Is335 then
+        base.scrollFrame.ScrollBar = _G[base.scrollFrame:GetName() .. "ScrollBar"]
+        base.scrollFrame.ScrollBar:ClearAllPoints()
+        base.scrollFrame.ScrollBar:SetPoint("TOPRIGHT", -6, -16)
+        base.scrollFrame.ScrollBar:SetPoint("BOTTOMRIGHT", -6, 16)
+        base.scrollFrame.ScrollBar.Show = function() end
+    end
     base.scrollFrame.ScrollBar:Hide()
 
     base.scrollContainer = CreateFrame("Frame")
