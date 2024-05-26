@@ -321,6 +321,10 @@ QuestieCompat.C_DateAndTime = {
 	end
 }
 
+local function parseQuestObjective(text)
+    return string.match(string.gsub(text, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)")
+end
+
 QuestieCompat.C_QuestLog = {
 	-- Returns info for the objectives of a quest. (https://wowpedia.fandom.com/wiki/API_C_QuestLog.GetQuestObjectives)
 	GetQuestObjectives = function(questID, questLogIndex)
@@ -331,7 +335,16 @@ QuestieCompat.C_QuestLog = {
 		    	-- https://wowpedia.fandom.com/wiki/API_GetQuestLogLeaderBoard
 		    	local description, objectiveType, isCompleted = GetQuestLogLeaderBoard(i, questLogIndex);
                 if objectiveType ~= "log" then
-		    	    local objectiveName, numFulfilled, numRequired = string.match(string.gsub(description, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)");
+		    	    local objectiveName, numFulfilled, numRequired = parseQuestObjective(description)
+                    -- GetQuestLogLeaderBoard randomly returns incorrect objective information.
+                    -- Parsing the UI_INFO_MESSAGE event for the correct numFulfilled value seems like the solution.
+                    if QuestieCompat.lastQuestObjective then
+                        local name, fulfilled, required = parseQuestObjective(QuestieCompat.lastQuestObjective)
+                        if (name == objectiveName) and (fulfilled ~= numFulfilled) then
+                            numFulfilled = fulfilled
+                        end
+                    end
+
 		    	    table.insert(questObjectives, {
 		    	    	text = description,
 		    	    	type = objectiveType,
@@ -1080,6 +1093,7 @@ local chatMessagePattern = {
 function QuestieCompat.UiInfoMessage(event, message)
     for _, pattern in pairs(chatMessagePattern.questInfo) do
         if string.find(message, pattern) then
+            QuestieCompat.lastQuestObjective = message
             MinimapIcon:UpdateText(message)
         end
     end
@@ -1180,8 +1194,10 @@ function QuestieCompat.QuestEventHandler_RegisterEvents()
     -- https://wowpedia.fandom.com/wiki/QUEST_TURNED_IN
     hooksecurefunc("GetQuestReward", function(itemChoice)
         local questId = QuestieCompat.GetQuestID()
-        _QuestEventHandler:QuestTurnedIn(questId)
-        _QuestEventHandler:QuestRemoved(questId)
+        if questId and questId > 0 then
+            _QuestEventHandler:QuestTurnedIn(questId)
+            _QuestEventHandler:QuestRemoved(questId)
+        end
     end)
 
     hooksecurefunc("SetAbandonQuest", function()
@@ -1381,5 +1397,11 @@ function QuestieCompat:ADDON_LOADED(event, addon)
     local Mapster = LibStub("AceAddon-3.0"):GetAddon("Mapster", true)
     if Mapster and Mapster.RefreshQuestObjectivesDisplay then
         hooksecurefunc(Mapster, "RefreshQuestObjectivesDisplay", QuestieCompat.HBDPins.UpdateWorldMap)
+    end
+
+    local MBF = LibStub("AceAddon-3.0"):GetAddon("Minimap Button Frame", true)
+    if MBF and MBF.db.profile.MinimapIcons then
+        table.insert(MBF.db.profile.MinimapIcons, "QuestieFrame")
+        MBF:fillDropdowns()
     end
 end

@@ -923,7 +923,7 @@ function TrackerLinePool.SetAllPlayButtonAlpha(alpha)
         local highestIndex = TrackerLinePool.GetHighestIndex()
         for i = 1, highestIndex do
             local line = linePool[i]
-            local questId = line.playButton.mode
+            local questId = line.playButton.mode or 0
             local button = VoiceOver.QuestOverlayUI.questPlayButtons[questId]
             local sound = VoiceOver.DataModules:PrepareSound({ event = 1, questID = questId })
 
