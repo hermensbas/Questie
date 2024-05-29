@@ -436,9 +436,8 @@ end
 -- Returns a list of quests the character has completed in its lifetime.
 -- https://wowpedia.fandom.com/wiki/API_GetQuestsCompleted
 function QuestieCompat.GetQuestsCompleted()
-    if not Questie.db.char.complete then
-        Questie.db.char.complete = {}
-    end
+    Questie.db.char.complete = {}
+
     QueryQuestsCompleted()
     return Questie.db.char.complete
 end
@@ -1132,12 +1131,6 @@ function QuestieCompat.GroupRosterUpdate(event)
 end
 
 function QuestieCompat.QuestieEventHandler_RegisterLateEvents()
-    -- https://wowpedia.fandom.com/wiki/GROUP_ROSTER_UPDATE
-    -- https://wowpedia.fandom.com/wiki/GROUP_JOINED
-    -- https://wowpedia.fandom.com/wiki/GROUP_LEFT
-    Questie:RegisterEvent("PARTY_MEMBERS_CHANGED", QuestieCompat.GroupRosterUpdate)
-    Questie:RegisterBucketEvent("RAID_ROSTER_UPDATE", 1, QuestieCompat.GroupRosterUpdate)
-
     -- In fullscreen mode, WorldMap intercepts keyboard input,
     -- preventing the MODIFIER_STATE_CHANGED event
     if WorldMapFrame:GetScript("OnKeyDown") then
@@ -1156,8 +1149,20 @@ function QuestieCompat.QuestieEventHandler_RegisterLateEvents()
         end)
     end
 
-    -- https://wowpedia.fandom.com/wiki/NAME_PLATE_UNIT_ADDED
-    -- https://wowpedia.fandom.com/wiki/NAME_PLATE_UNIT_REMOVED
+    Questie:UnregisterEvent("MAP_EXPLORATION_UPDATED") -- https://wowpedia.fandom.com/wiki/MAP_EXPLORATION_UPDATED
+    Questie:UnregisterEvent("NEW_RECIPE_LEARNED")
+
+    -- Party join event for QuestieComms, Use bucket to hinder this from spamming (Ex someone using a raid invite addon etc)
+    Questie:UnregisterEvent("GROUP_ROSTER_UPDATE") -- https://wowpedia.fandom.com/wiki/GROUP_ROSTER_UPDATE
+    Questie:UnregisterEvent("GROUP_JOINED") -- https://wowpedia.fandom.com/wiki/GROUP_JOINED
+    Questie:UnregisterEvent("GROUP_LEFT") -- https://wowpedia.fandom.com/wiki/GROUP_LEFT
+    Questie:RegisterEvent("PARTY_MEMBERS_CHANGED", QuestieCompat.GroupRosterUpdate)
+    Questie:RegisterBucketEvent("RAID_ROSTER_UPDATE", 1, QuestieCompat.GroupRosterUpdate)
+
+    -- Nameplate / Target Frame Objective Events
+    Questie:UnregisterEvent("NAME_PLATE_UNIT_ADDED") -- https://wowpedia.fandom.com/wiki/NAME_PLATE_UNIT_ADDED
+    Questie:UnregisterEvent("NAME_PLATE_UNIT_ADDED") -- https://wowpedia.fandom.com/wiki/NAME_PLATE_UNIT_REMOVED
+
     if Questie.db.profile.nameplateEnabled then
         QuestieNameplate.UpdateNameplate = QuestieCompat.UpdateNameplate
         hooksecurefunc(QuestieQuest, "GetAllQuestIds", QuestieCompat.UpdateNameplate)
@@ -1177,6 +1182,7 @@ end
 function QuestieCompat.QuestEventHandler_RegisterEvents()
     local _QuestEventHandler = QuestEventHandler.private
     -- https://wowpedia.fandom.com/wiki/PLAYER_INTERACTION_MANAGER_FRAME_HIDE
+    QuestieQuestEventFrame:UnregisterEvent("PLAYER_INTERACTION_MANAGER_FRAME_HIDE")
     for _, event in pairs({
         "TRADE_CLOSED",
         "MERCHANT_CLOSED",
@@ -1192,6 +1198,7 @@ function QuestieCompat.QuestEventHandler_RegisterEvents()
     QuestieCompat.frame:RegisterEvent("QUEST_QUERY_COMPLETE")
 
     -- https://wowpedia.fandom.com/wiki/QUEST_TURNED_IN
+    QuestieQuestEventFrame:UnregisterEvent("QUEST_TURNED_IN")
     hooksecurefunc("GetQuestReward", function(itemChoice)
         local questId = QuestieCompat.GetQuestID()
         if questId and questId > 0 then
@@ -1205,6 +1212,7 @@ function QuestieCompat.QuestEventHandler_RegisterEvents()
     end)
 
     --https://wowpedia.fandom.com/wiki/QUEST_REMOVED
+    QuestieQuestEventFrame:UnregisterEvent("QUEST_REMOVED")
     hooksecurefunc("AbandonQuest", function()
         local questId = QuestieCompat.abandonQuestID or select(9, GetQuestLogTitle(GetQuestLogSelection()))
         _QuestEventHandler:QuestRemoved(QuestieCompat.abandonQuestID)
