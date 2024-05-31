@@ -194,6 +194,19 @@ function QuestieCompat.GetCurrentUiMapID()
     return mapIdToUiMapId[mapID + GetCurrentMapDungeonLevel()/10] or 946
 end
 
+-- maps mapAreaID to Zone and Continent index
+-- https://wowpedia.fandom.com/wiki/API_GetMapContinents
+-- https://wowpedia.fandom.com/wiki/API_GetMapZones
+QuestieCompat.mapIdToCZ = {}
+for C in ipairs({GetMapContinents()}) do
+    local zones = {GetMapZones(C)}
+    for Z in ipairs(zones) do
+        SetMapZoom(C, Z)
+        local mapId = GetCurrentMapAreaID()
+        QuestieCompat.mapIdToCZ[mapId] = Z + C/10
+    end
+end
+
 -- This function will do its utmost to retrieve some sort of valid position
 -- for the player, including changing the current map zoom (if needed)
 -- https://wowpedia.fandom.com/wiki/API_C_Map.GetPlayerMapPosition?oldid=2167175
@@ -230,7 +243,7 @@ end
 local playerPos = {}
 function QuestieCompat.GetPlayerMapPosition()
     playerPos.uiMapID, playerPos.x, playerPos.y = QuestieCompat.GetCurrentPlayerPosition()
-    return playerPos
+    return playerPos, playerPos.uiMapID
 end
 
 QuestieCompat.C_Map = {
@@ -845,7 +858,7 @@ function QuestieCompat.CreateLine(self)
     if self.line then return stub_line end -- stub lineBorder, as our line texture already has border
 
     local line = self:CreateTexture(nil, "OVERLAY")
-    line:SetTexture(QuestieLib.AddonPath.."Compat\\Waypoint-Line.blp")
+    line:SetTexture(QuestieLib.AddonPath.."Compat\\Icons\\Waypoint-Line.blp")
     line.SetColorTexture = line.SetVertexColor
 
     for k,v in pairs(LineMixin) do
@@ -1161,7 +1174,7 @@ function QuestieCompat.QuestieEventHandler_RegisterLateEvents()
 
     -- Nameplate / Target Frame Objective Events
     Questie:UnregisterEvent("NAME_PLATE_UNIT_ADDED") -- https://wowpedia.fandom.com/wiki/NAME_PLATE_UNIT_ADDED
-    Questie:UnregisterEvent("NAME_PLATE_UNIT_ADDED") -- https://wowpedia.fandom.com/wiki/NAME_PLATE_UNIT_REMOVED
+    Questie:UnregisterEvent("NAME_PLATE_UNIT_REMOVED") -- https://wowpedia.fandom.com/wiki/NAME_PLATE_UNIT_REMOVED
 
     if Questie.db.profile.nameplateEnabled then
         QuestieNameplate.UpdateNameplate = QuestieCompat.UpdateNameplate
@@ -1270,8 +1283,8 @@ local townsfolk_texturemap = {
     ["Drink"] = "Interface\\Icons\\inv_potion_01",
     ["Food"] = "Interface\\Icons\\inv_misc_food_11",
     ["Pet Food"] = "Interface\\Icons\\ability_hunter_beasttraining",
-    ["Spirit Healer"] = "Interface\\Addons\\"..QuestieCompat.addonName.."\\Compat\\Raid-Icon-Rez.blp",
-    ["Portal Trainer"] = "Interface\\Addons\\"..QuestieCompat.addonName.."\\Compat\\Vehicle-AllianceMagePortal.blp",
+    ["Spirit Healer"] = "Interface\\Addons\\"..QuestieCompat.addonName.."\\Compat\\Icons\\Raid-Icon-Rez.blp",
+    ["Portal Trainer"] = "Interface\\Addons\\"..QuestieCompat.addonName.."\\Compat\\Icons\\Vehicle-AllianceMagePortal.blp",
 }
 
 StaticPopupDialogs["QUESTIE_RELOAD"] = {

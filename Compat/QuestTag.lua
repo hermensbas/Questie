@@ -1130,7 +1130,7 @@ QuestieCompat.QuestTag = {
 	[9665] = 41,
 }
 
-if QuestieCompat.WOW_PROJECT_ID < 2 then return end
+if QuestieCompat.WOW_PROJECT_ID < QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC then return end
 
 local QuestTag = {
 	[17] = 0,
@@ -1664,7 +1664,7 @@ for id, tag in pairs(QuestTag) do
 end
 QuestTag = nil
 
-if QuestieCompat.WOW_PROJECT_ID < 3 then return end
+if QuestieCompat.WOW_PROJECT_ID < QuestieCompat.WOW_PROJECT_WRATH_CLASSIC then return end
 
 local QuestTag = {
 	[236] = 41,

@@ -30,7 +30,7 @@
     <Script file="Compat.lua"/>
     <Script file="FactionId.lua"/>
     <Script file="QuestTag.lua"/>
-    <Script file="QuestMoney.lua"/>
+    <Script file="QuestReward.lua"/>
     <Script file="UiMapData.lua"/>
     <Script file="HBD.lua"/>
 </Ui>
