@@ -12,7 +12,7 @@ local WorldMapFrame = QuestieCompat.WorldMapFrame
 local posX = 0;
 local posY = 0;
 
-QuestieCoords.updateInterval = 0.5;
+QuestieCoords.updateInterval = QuestieCompat.Is335 and 0.1 or 0.5;
 -- Placing the functions locally to save time when spamming the updateInterval
 local GetBestMapForUnit = C_Map.GetBestMapForUnit;
 local GetPlayerMapPosition = C_Map.GetPlayerMapPosition;
@@ -90,6 +90,10 @@ function QuestieCoords:WriteCoords()
         curX = (curX - left) / width * 100;
         curY = (top - curY) / height * 100;
         local precision = "%.".. Questie.db.profile.mapCoordinatePrecision .."f";
+
+        if QuestieCompat.Is335 and (not canvas:IsMouseOver()) or (position.uiMapID == 946)then
+            curX, curY = 0, 0
+        end
 
         local worldmapCoordsText = "Cursor: "..format(precision.. " X, ".. precision .." Y  ", curX, curY);
 

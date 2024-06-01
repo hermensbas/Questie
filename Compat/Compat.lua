@@ -197,14 +197,19 @@ end
 -- maps mapAreaID to Zone and Continent index
 -- https://wowpedia.fandom.com/wiki/API_GetMapContinents
 -- https://wowpedia.fandom.com/wiki/API_GetMapZones
-QuestieCompat.mapIdToCZ = {}
+local mapIdToCZ = {}
 for C in ipairs({GetMapContinents()}) do
     local zones = {GetMapZones(C)}
     for Z in ipairs(zones) do
         SetMapZoom(C, Z)
         local mapId = GetCurrentMapAreaID()
-        QuestieCompat.mapIdToCZ[mapId] = Z + C/10
+        mapIdToCZ[mapId] = Z + C/10
     end
+end
+
+function QuestieCompat.TomTom_AddWaypoint(title, zone, x, y)
+    local CZ = mapIdToCZ[QuestieCompat.UiMapData[zone].mapID]
+    return TomTom:AddZWaypoint(QuestieCompat.Round(CZ%1 * 10), math.floor(CZ), x, y, title)
 end
 
 -- This function will do its utmost to retrieve some sort of valid position

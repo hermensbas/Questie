@@ -111,8 +111,7 @@ function TrackerUtils:SetTomTomTarget(title, zone, x, y)
         local uiMapId = ZoneDB:GetUiMapIdByAreaId(zone)
 
         if QuestieCompat.Is335 then
-            local CZ = QuestieCompat.mapIdToCZ[QuestieCompat.UiMapData[uiMapId].mapID]
-            Questie.db.char._tom_waypoint = TomTom:AddZWaypoint(QuestieCompat.Round(CZ%1 * 10), math.floor(CZ), x, y, title)
+            Questie.db.char._tom_waypoint = QuestieCompat.TomTom_AddWaypoint(title, uiMapId, x, y)
         else
             Questie.db.char._tom_waypoint = TomTom:AddWaypoint(uiMapId, x / 100, y / 100, { title = title, crazy = true })
         end
