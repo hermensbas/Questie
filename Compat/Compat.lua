@@ -125,25 +125,30 @@ QuestieCompat.ChrClasses = {
 	DRUID = 11,
 }
 
+local activeTimers = {}
 local inactiveTimers = {}
 
-local function timerCancel(self)
-    if not inactiveTimers[self] then
-        self:GetParent():Stop()
-        inactiveTimers[self] = true
-    end
+local function timerCancel(id)
+    local timer = activeTimers[id]
+    if not timer then return end
+
+    timer:GetParent():Stop()
+
+    timer.id = nil
+    activeTimers[id] = nil
+	inactiveTimers[timer] = true
 end
 
 local function timerOnFinished(self)
     local id = self.id
-    self.callback(self)
+    self.callback(id)
 
-    --Make sure timer wasn't cancelled during the callback and used again
+    -- Make sure timer wasn't cancelled during the callback and used again
     if id == self.id then
         if self.iterations > 0 then
             self.iterations = self.iterations - 1
             if self.iterations == 0 then
-                self:Cancel()
+                timerCancel(id)
             end
         end
     end
@@ -158,7 +163,6 @@ QuestieCompat.C_Timer = {
         else
         	local anim = QuestieCompat.frame:CreateAnimationGroup()
         	timer = anim:CreateAnimation()
-            timer.Cancel = timerCancel
         	timer:SetScript("OnFinished", timerOnFinished)
         end
 
@@ -167,13 +171,14 @@ QuestieCompat.C_Timer = {
 
         timer.callback = callback
         timer.iterations = iterations or -1
-        timer.id = debugprofilestop()
+        timer.id = {Cancel = timerCancel}
+        activeTimers[timer.id] = timer
 
         local anim = timer:GetParent()
         anim:SetLooping("REPEAT")
         anim:Play()
 
-        return timer
+        return timer.id
     end,
     -- Schedules a timer. (https://wowpedia.fandom.com/wiki/API_C_Timer.After)
     After = function(duration, callback)
@@ -454,7 +459,9 @@ end
 -- Returns a list of quests the character has completed in its lifetime.
 -- https://wowpedia.fandom.com/wiki/API_GetQuestsCompleted
 function QuestieCompat.GetQuestsCompleted()
-    Questie.db.char.complete = {}
+    if not Questie.db.char.complete then
+        Questie.db.char.complete = {}
+    end
 
     QueryQuestsCompleted()
     return Questie.db.char.complete
@@ -1197,8 +1204,22 @@ function QuestieCompat.QuestieEventHandler_RegisterLateEvents()
     end
 end
 
+local _QuestEventHandler = QuestEventHandler.private
+local QUEST_COMPLETE_MSG = string.gsub(ERR_QUEST_COMPLETE_S, "(%%s)", "(.+)")
+
+function QuestieCompat:CHAT_MSG_SYSTEM(event, message)
+    if QuestieCompat.completeQuestName == message:match(QUEST_COMPLETE_MSG) then
+        if QuestieCompat.completeQuestID then
+            _QuestEventHandler:QuestTurnedIn(QuestieCompat.completeQuestID)
+            _QuestEventHandler:QuestRemoved(QuestieCompat.completeQuestID)
+        end
+    end
+end
+
 function QuestieCompat.QuestEventHandler_RegisterEvents()
-    local _QuestEventHandler = QuestEventHandler.private
+    QuestieCompat.frame:RegisterEvent("QUEST_QUERY_COMPLETE")
+    QuestieCompat.frame:RegisterEvent("CHAT_MSG_SYSTEM")
+
     -- https://wowpedia.fandom.com/wiki/PLAYER_INTERACTION_MANAGER_FRAME_HIDE
     QuestieQuestEventFrame:UnregisterEvent("PLAYER_INTERACTION_MANAGER_FRAME_HIDE")
     for _, event in pairs({
@@ -1213,15 +1234,14 @@ function QuestieCompat.QuestEventHandler_RegisterEvents()
         QuestieCompat.frame:RegisterEvent(event)
         QuestieCompat[event] = _QuestEventHandler.QuestRelatedFrameClosed
     end
-    QuestieCompat.frame:RegisterEvent("QUEST_QUERY_COMPLETE")
 
     -- https://wowpedia.fandom.com/wiki/QUEST_TURNED_IN
     QuestieQuestEventFrame:UnregisterEvent("QUEST_TURNED_IN")
     hooksecurefunc("GetQuestReward", function(itemChoice)
         local questId = QuestieCompat.GetQuestID()
         if questId and questId > 0 then
-            _QuestEventHandler:QuestTurnedIn(questId)
-            _QuestEventHandler:QuestRemoved(questId)
+            QuestieCompat.completeQuestID = questId
+            QuestieCompat.completeQuestName = GetTitleText()
         end
     end)
 
