@@ -344,6 +344,8 @@ QuestieCompat.C_DateAndTime = {
 	end
 }
 
+local questObjectivesCache = {}
+
 local function parseQuestObjective(text)
     return string.match(string.gsub(text, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)")
 end
@@ -361,11 +363,10 @@ QuestieCompat.C_QuestLog = {
 		    	    local objectiveName, numFulfilled, numRequired = parseQuestObjective(description)
                     -- GetQuestLogLeaderBoard randomly returns incorrect objective information.
                     -- Parsing the UI_INFO_MESSAGE event for the correct numFulfilled value seems like the solution.
-                    if QuestieCompat.lastQuestObjective then
-                        local name, fulfilled, required = parseQuestObjective(QuestieCompat.lastQuestObjective)
-                        if (name == objectiveName) and (fulfilled ~= numFulfilled) then
-                            numFulfilled = fulfilled
-                        end
+                    local fulfilled = questObjectivesCache[objectiveName]
+                    if fulfilled and (fulfilled ~= numFulfilled) then
+                        numFulfilled = fulfilled
+                        questObjectivesCache[objectiveName] = nil
                     end
 
 		    	    table.insert(questObjectives, {
@@ -1023,6 +1024,7 @@ local function isNamePlate(frame)
     if frame.UnitFrame  -- ElvUI
     or frame.extended   -- TidyPlates
     or frame.aloftData  -- Aloft
+    or frame.kui  -- Kui_Nameplate
     then return true end
 
     local _, borderRegion = frame:GetRegions()
@@ -1117,7 +1119,10 @@ local chatMessagePattern = {
 function QuestieCompat.UiInfoMessage(event, message)
     for _, pattern in pairs(chatMessagePattern.questInfo) do
         if string.find(message, pattern) then
-            QuestieCompat.lastQuestObjective = message
+            local objectiveName, numFulfilled = parseQuestObjective(message)
+            if objectiveName and numFulfilled then
+                questObjectivesCache[objectiveName] = numFulfilled
+            end
             MinimapIcon:UpdateText(message)
         end
     end
@@ -1206,13 +1211,15 @@ end
 
 local _QuestEventHandler = QuestEventHandler.private
 local QUEST_COMPLETE_MSG = string.gsub(ERR_QUEST_COMPLETE_S, "(%%s)", "(.+)")
+local completeQuestCache = {}
 
 function QuestieCompat:CHAT_MSG_SYSTEM(event, message)
-    if QuestieCompat.completeQuestName == message:match(QUEST_COMPLETE_MSG) then
-        if QuestieCompat.completeQuestID then
-            _QuestEventHandler:QuestTurnedIn(QuestieCompat.completeQuestID)
-            _QuestEventHandler:QuestRemoved(QuestieCompat.completeQuestID)
-        end
+    local questName = message:match(QUEST_COMPLETE_MSG)
+    local questId = completeQuestCache[questName]
+    if questId then
+        _QuestEventHandler:QuestTurnedIn(questId)
+        _QuestEventHandler:QuestRemoved(questId)
+        completeQuestCache[questName] = nil
     end
 end
 
@@ -1240,8 +1247,7 @@ function QuestieCompat.QuestEventHandler_RegisterEvents()
     hooksecurefunc("GetQuestReward", function(itemChoice)
         local questId = QuestieCompat.GetQuestID()
         if questId and questId > 0 then
-            QuestieCompat.completeQuestID = questId
-            QuestieCompat.completeQuestName = GetTitleText()
+            completeQuestCache[GetTitleText()] = questId
         end
     end)
 
@@ -1387,6 +1393,22 @@ function QuestieCompat.QuestieOptions_Initialize()
             QuestieOptions:SetProfileValue(info, value/10)
         end,
     }
+end
+
+local correctionsRegistry = {}
+
+function QuestieCompat.RegisterCorrection(dbName, corrections)
+    correctionsRegistry[dbName] = correctionsRegistry[dbName] or {}
+    table.insert(correctionsRegistry[dbName], corrections)
+end
+
+function QuestieCompat.LoadCorrections(_LoadCorrections, validationTables)
+    for dbName in pairs(correctionsRegistry) do
+        local dbKeysReversed = QuestieDB[dbName:sub(1, -5).."KeysReversed"]
+        for i, corrections in ipairs(correctionsRegistry[dbName]) do
+            _LoadCorrections(dbName, corrections(), dbKeysReversed, validationTables)
+        end
+    end
 end
 
 function QuestieCompat:ADDON_LOADED(event, addon)

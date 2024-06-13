@@ -307,6 +307,8 @@ function QuestieCorrections:Initialize(validationTables)
     --- Corrections that apply to all versions
     _LoadCorrections("itemData", QuestieItemStartFixes:LoadAutomaticQuestStarts(), QuestieDB.itemKeysReversed, validationTables, true, true)
 
+    if QuestieCompat.Is335 then QuestieCompat.LoadCorrections(_LoadCorrections, validationTables) end
+
     local patchCount = 0
     for _, quest in pairs(QuestieDB.questData) do
         if (not quest[QuestieDB.questKeys.requiredRaces]) or quest[QuestieDB.questKeys.requiredRaces] == 0 then

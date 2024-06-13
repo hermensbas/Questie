@@ -169,8 +169,10 @@ function QuestEventHandler:RegisterEvents()
         if deletedQuestItem then
             Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieQuest] DeleteCursorItem: Quest Item deleted. Update all quests.")
 
-            _QuestEventHandler:UpdateAllQuests()
-            deletedQuestItem = false
+            C_Timer.After(0.25, function()
+				_QuestEventHandler:UpdateAllQuests()
+				deletedQuestItem = false
+			end)
         end
     end)
 
