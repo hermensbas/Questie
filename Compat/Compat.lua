@@ -546,6 +546,20 @@ function QuestieCompat.GetQuestID(questStarter, title)
 	return QuestieDB.GetQuestIDFromName(title, guid, questStarter)
 end
 
+function QuestieCompat.GetQuestIDFromName(questTitle)
+    for questLogIndex = 1, MAX_QUEST_LOG_INDEX do
+        local title, _, _, _, isHeader, _, _, _, id = GetQuestLogTitle(questLogIndex)
+        if (not title) then
+            break -- We exceeded the valid quest log entries
+        end
+        if (not isHeader) then
+            if (questTitle == title) then
+                return id
+            end
+        end
+    end
+end
+
 -- https://wowwiki-archive.fandom.com/wiki/API_UnitGUID?oldid=2368080
 local GUIDType = {
     [0]="Player",
@@ -1245,9 +1259,10 @@ function QuestieCompat.QuestEventHandler_RegisterEvents()
     -- https://wowpedia.fandom.com/wiki/QUEST_TURNED_IN
     QuestieQuestEventFrame:UnregisterEvent("QUEST_TURNED_IN")
     hooksecurefunc("GetQuestReward", function(itemChoice)
-        local questId = QuestieCompat.GetQuestID()
+        local questTitle = GetTitleText()
+        local questId = QuestieCompat.GetQuestIDFromName(questTitle)
         if questId and questId > 0 then
-            completeQuestCache[GetTitleText()] = questId
+            completeQuestCache[questTitle] = questId
         end
     end)
 
