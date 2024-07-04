@@ -472,6 +472,12 @@ end
 -- https://wowpedia.fandom.com/wiki/QUEST_QUERY_COMPLETE
 function QuestieCompat:QUEST_QUERY_COMPLETE(event)
     GetQuestsCompleted(Questie.db.char.complete)
+
+    for questId in pairs(Questie.db.char.complete) do
+        if QuestieDB.IsRepeatable(questId) then
+            Questie.db.char.complete[questId] = nil
+        end
+    end
 end
 
 -- https://wowpedia.fandom.com/wiki/API_IsQuestFlaggedCompleted
