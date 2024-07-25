@@ -344,6 +344,24 @@ QuestieCompat.C_DateAndTime = {
 	end
 }
 
+-- Returns the server's Unix time.
+-- https://wowpedia.fandom.com/wiki/API_GetServerTime
+function QuestieCompat.GetServerTime()
+    local weekday, month, day, year = CalendarGetDate()
+	local hours, minutes = GetGameTime()
+
+    local currentDate = {
+        year = year,
+        month = month,
+        day = day,
+        weekday = weekday,
+        hour = hours,
+        min = minutes,
+    }
+
+    return time(currentDate), currentDate
+end
+
 local questObjectivesCache = {}
 
 local function parseQuestObjective(text)
@@ -364,7 +382,7 @@ QuestieCompat.C_QuestLog = {
                     -- GetQuestLogLeaderBoard randomly returns incorrect objective information.
                     -- Parsing the UI_INFO_MESSAGE event for the correct numFulfilled value seems like the solution.
                     local fulfilled = questObjectivesCache[objectiveName]
-                    if fulfilled and (fulfilled ~= numFulfilled) then
+                    if fulfilled then
                         numFulfilled = fulfilled
                         questObjectivesCache[objectiveName] = nil
                     end
@@ -457,6 +475,93 @@ function QuestieCompat.GetQuestLogRewardMoney(questID)
     return rewardMoney
 end
 
+function QuestieCompat.CalculateNextResetTime()
+    local currentTime, currentDate = QuestieCompat.GetServerTime()
+    local timeUntilReset = GetQuestResetTime()
+
+    Questie:Debug(Questie.DEBUG_DEVELOP, "[CalculateNextResetTime] GetQuestResetTime: ", timeUntilReset)
+    if timeUntilReset <= 0 then
+        Questie:Error("GetQuestResetTime() returns an invalid value: "..timeUntilReset..". Please report on Github!")
+        return
+    end
+    Questie.db.profile.dailyResetTime = Questie.db.profile.dailyResetTime or (currentTime + timeUntilReset)
+    Questie:Debug(Questie.DEBUG_DEVELOP, "[CalculateNextResetTime] Next daily rest time: ", date("%m/%d/%y %H:%M:%S", Questie.db.profile.dailyResetTime))
+
+    Questie.db.profile.weeklyResetHour = Questie.db.profile.weeklyResetHour or tonumber(date("%H", Questie.db.profile.dailyResetTime+300))
+    local dayOffset = (Questie.db.profile.weeklyResetDay - currentDate.weekday + 7) % 7
+    if dayOffset == 0 and currentDate.hour >= Questie.db.profile.weeklyResetHour then
+        dayOffset = 7
+    end
+
+    Questie.db.profile.weeklyResetTime = Questie.db.profile.weeklyResetTime or time({
+        year = currentDate.year,
+        month = currentDate.month,
+        day = currentDate.day + dayOffset,
+        hour = Questie.db.profile.weeklyResetHour,
+    })
+    Questie:Debug(Questie.DEBUG_DEVELOP, "[CalculateNextResetTime] Next weekly rest time: ", date("%m/%d/%y %H:%M:%S", Questie.db.profile.weeklyResetTime))
+end
+
+function QuestieCompat.ResetDailyQuests(reset)
+    local currentTime = QuestieCompat.GetServerTime()
+
+    if reset or (currentTime > Questie.db.profile.dailyResetTime) then
+        print("[ResetDailyQuests]")
+        for questId in pairs(Questie.db.char.daily) do
+            Questie.db.char.daily[questId] = nil
+            Questie.db.char.complete[questId] = nil
+        end
+        Questie.db.profile.dailyResetTime = nil
+        QuestieCompat.CalculateNextResetTime()
+        if Questie.started then
+            AvailableQuests.CalculateAndDrawAll()
+        end
+    end
+end
+
+local weeklyResetTimer
+function QuestieCompat.ResetWeeklyQuests()
+    local currentTime = QuestieCompat.GetServerTime()
+    local timeUntilReset = Questie.db.profile.weeklyResetTime - currentTime
+
+    if timeUntilReset < 1800 then
+        if weeklyResetTimer then
+            weeklyResetTimer = weeklyResetTimer:Cancel()
+        end
+
+        weeklyResetTimer = weeklyResetTimer or QuestieCompat.C_Timer.After(timeUntilReset, function()
+            print("[ResetWeeklyQuests]")
+            for questId in pairs(Questie.db.char.weekly) do
+                Questie.db.char.weekly[questId] = nil
+                Questie.db.char.complete[questId] = nil
+            end
+            Questie.db.profile.weeklyResetTime = nil
+            QuestieCompat.CalculateNextResetTime()
+            if Questie.started then
+                AvailableQuests.CalculateAndDrawAll()
+            end
+        end)
+
+        return true
+    end
+end
+
+function QuestieCompat.SetQuestComplete(questId)
+    if (not QuestieDB.IsRepeatable(questId)) then
+        Questie.db.char.complete[questId] = true
+    end
+
+    if Questie.db.profile.resetDailyQuests then
+        if QuestieDB.IsDailyQuest(questId) then
+            Questie.db.char.daily[questId] = true
+            Questie.db.char.complete[questId] = true
+        elseif QuestieDB.IsWeeklyQuest(questId) then
+            Questie.db.char.weekly[questId] = true
+            Questie.db.char.complete[questId] = true
+        end
+    end
+end
+
 -- Returns a list of quests the character has completed in its lifetime.
 -- https://wowpedia.fandom.com/wiki/API_GetQuestsCompleted
 function QuestieCompat.GetQuestsCompleted()
@@ -476,6 +581,19 @@ function QuestieCompat:QUEST_QUERY_COMPLETE(event)
     for questId in pairs(Questie.db.char.complete) do
         if QuestieDB.IsRepeatable(questId) then
             Questie.db.char.complete[questId] = nil
+        end
+    end
+
+    if Questie.db.profile.resetDailyQuests then
+        QuestieCompat.CalculateNextResetTime()
+        QuestieCompat.ResetDailyQuests()
+        QuestieCompat.Merge(Questie.db.char.complete, Questie.db.char.daily)
+
+        if Questie.IsWotlk and QuestiePlayer.GetPlayerLevel() >= 78 then
+            if (not QuestieCompat.ResetWeeklyQuests()) and (Questie.db.profile.weeklyResetDay == CalendarGetDate()) then
+                weeklyResetTimer = weeklyResetTimer or QuestieCompat.C_Timer.NewTicker(1800, QuestieCompat.ResetWeeklyQuests)
+            end
+            QuestieCompat.Merge(Questie.db.char.complete, Questie.db.char.weekly)
         end
     end
 end
@@ -1233,6 +1351,8 @@ local _QuestEventHandler = QuestEventHandler.private
 local QUEST_COMPLETE_MSG = string.gsub(ERR_QUEST_COMPLETE_S, "(%%s)", "(.+)")
 local completeQuestCache = {}
 
+local DAILY_QUESTS_MSG = DAILY_QUESTS_REMAINING:gsub("%%d", "(%%d+)"):gsub("|4(.-)$", "")
+
 function QuestieCompat:CHAT_MSG_SYSTEM(event, message)
     local questName = message:match(QUEST_COMPLETE_MSG)
     local questId = completeQuestCache[questName]
@@ -1240,6 +1360,15 @@ function QuestieCompat:CHAT_MSG_SYSTEM(event, message)
         _QuestEventHandler:QuestTurnedIn(questId)
         _QuestEventHandler:QuestRemoved(questId)
         completeQuestCache[questName] = nil
+    end
+
+    if Questie.db.profile.resetDailyQuests then
+        local dailyQuestCount = tonumber(message:match(DAILY_QUESTS_MSG))
+        if dailyQuestCount and (dailyQuestCount == GetMaxDailyQuests()) then
+            QuestieCompat.C_Timer.After(1, function()
+                QuestieCompat.ResetDailyQuests(true)
+            end)
+        end
     end
 end
 
@@ -1390,7 +1519,7 @@ function QuestieCompat.QuestieOptions_Initialize()
         order = 6.1,
         name = "Use WotLK map data",
         desc = "Use WotLK map data",
-        width = 1.8,
+        width = 1.65,
         disabled = function() return QuestieCompat.WOW_PROJECT_ID == QuestieCompat.WOW_PROJECT_WRATH_CLASSIC end,
         get = function (info) return QuestieOptions:GetProfileValue(info); end,
         set = function (info, value)
@@ -1404,7 +1533,7 @@ function QuestieCompat.QuestieOptions_Initialize()
         order = 6.2,
         name = "Init rate delay",
         desc = "Init rate delay",
-        width = 1.5,
+        width = 1.65,
         min = 0.1,
         max = 1,
         step = 0.01,
@@ -1412,6 +1541,37 @@ function QuestieCompat.QuestieOptions_Initialize()
         get = function(info) return QuestieOptions:GetProfileValue(info)*10; end,
         set = function (info, value)
             QuestieOptions:SetProfileValue(info, value/10)
+        end,
+    }
+
+    optionsTable.args.advanced_tab.args.resetDailyQuests = {
+        type = "toggle",
+        order = 6.2,
+        name = "Reset Daily Quests",
+        desc = "Reset Daily Quests",
+        width = 1.65,
+        get = function (info) return QuestieOptions:GetProfileValue(info); end,
+        set = function (info, value)
+            QuestieOptions:SetProfileValue(info, value)
+            Questie.db.profile.dailyResetTime = nil
+            StaticPopup_Show("QUESTIE_RELOAD")
+        end,
+    }
+
+    optionsTable.args.advanced_tab.args.weeklyResetDay = {
+        type = "select",
+        order = 6.3,
+        values = QuestieCompat.CALENDAR_WEEKDAY_NAMES,
+        style = 'dropdown',
+        disabled = function() return not Questie.db.profile.resetDailyQuests end,
+        name = "Weekly Reset Day",
+        desc = "Weekly Reset Day",
+        width = 1.6,
+        get = function (info) return QuestieOptions:GetProfileValue(info) end,
+        set = function (info, value)
+            QuestieOptions:SetProfileValue(info, value)
+            Questie.db.profile.weeklyResetTime = nil
+            StaticPopup_Show("QUESTIE_RELOAD")
         end,
     }
 end
@@ -1432,12 +1592,34 @@ function QuestieCompat.LoadCorrections(_LoadCorrections, validationTables)
     end
 end
 
+function QuestieCompat.Merge(target, source)
+	if type(target) ~= "table" then target = {} end
+	for k,v in pairs(source) do
+		if type(v) == "table" then
+			target[k] = QuestieCompat.Merge(target[k], v)
+		elseif target[k] == nil then
+			target[k] = v
+		end
+	end
+	return target
+end
+
 function QuestieCompat:ADDON_LOADED(event, addon)
     if addon ~= QuestieCompat.addonName then return end
 
-    Questie.db.profile.initDelay = Questie.db.profile.initDelay or 0.03
+    QuestieCompat.Merge(Questie.db, {
+        profile = {
+            initDelay = 0.03,
+            useWotlkMapData = false,
+            resetDailyQuests = true,
+            weeklyResetDay = 4,
+        },
+        char = {
+            daily = {},
+            weekly = {},
+        }
+    })
 
-    Questie.db.profile.useWotlkMapData = Questie.db.profile.useWotlkMapData or false
     QuestieCompat.LoadUiMapData(Questie.db.profile.useWotlkMapData and QuestieCompat.WOW_PROJECT_WRATH_CLASSIC)
 
     for uiMapId, data in pairs(QuestieCompat.UiMapData) do

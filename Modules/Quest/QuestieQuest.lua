@@ -494,7 +494,11 @@ function QuestieQuest:CompleteQuest(questId)
 
     -- Only quests that are daily quests or aren't repeatable should be marked complete,
     -- otherwise objectives for repeatable quests won't track correctly - #1433
-    Questie.db.char.complete[questId] = (not QuestieDB.IsRepeatable(questId)) or QuestieDB.IsDailyQuest(questId) or QuestieDB.IsWeeklyQuest(questId);
+    if QuestieCompat.Is335 then
+        QuestieCompat.SetQuestComplete(questId)
+    else
+        Questie.db.char.complete[questId] = (not QuestieDB.IsRepeatable(questId)) or QuestieDB.IsDailyQuest(questId) or QuestieDB.IsWeeklyQuest(questId);
+    end
 
     if allianceChampionMarkerQuests[questId] then
         Questie.db.char.complete[13700] = true -- Alliance Champion Marker
