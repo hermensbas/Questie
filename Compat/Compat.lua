@@ -32,7 +32,8 @@ local QuestieMenu = QuestieLoader:ImportModule("QuestieMenu")
 local QuestieTooltips = QuestieLoader:ImportModule("QuestieTooltips")
 ---@class QuestieNameplate
 local QuestieNameplate = QuestieLoader:ImportModule("QuestieNameplate")
-
+---@type QuestieCorrections
+local QuestieCorrections = QuestieLoader:ImportModule("QuestieCorrections")
 
 -- addon/folder name
 QuestieCompat.addonName = ...
@@ -506,7 +507,6 @@ function QuestieCompat.ResetDailyQuests(reset)
     local currentTime = QuestieCompat.GetServerTime()
 
     if reset or (currentTime > Questie.db.profile.dailyResetTime) then
-        print("[ResetDailyQuests]")
         for questId in pairs(Questie.db.char.daily) do
             Questie.db.char.daily[questId] = nil
             Questie.db.char.complete[questId] = nil
@@ -530,7 +530,6 @@ function QuestieCompat.ResetWeeklyQuests()
         end
 
         weeklyResetTimer = weeklyResetTimer or QuestieCompat.C_Timer.After(timeUntilReset, function()
-            print("[ResetWeeklyQuests]")
             for questId in pairs(Questie.db.char.weekly) do
                 Questie.db.char.weekly[questId] = nil
                 Questie.db.char.complete[questId] = nil
@@ -1592,12 +1591,27 @@ function QuestieCompat.LoadCorrections(_LoadCorrections, validationTables)
     end
 end
 
-function QuestieCompat.Merge(target, source)
+local blacklistRegistry = {}
+
+function QuestieCompat.RegisterBlacklist(blName, blacklist)
+    blacklistRegistry[blName] = blacklistRegistry[blName] or {}
+    table.insert(blacklistRegistry[blName], blacklist)
+end
+
+function QuestieCompat.LoadBlacklists()
+    for blName in pairs(blacklistRegistry) do
+        for _, blacklist in ipairs(blacklistRegistry[blName]) do
+            QuestieCompat.Merge(QuestieCorrections[blName], blacklist(), true)
+        end
+    end
+end
+
+function QuestieCompat.Merge(target, source, override)
 	if type(target) ~= "table" then target = {} end
 	for k,v in pairs(source) do
 		if type(v) == "table" then
-			target[k] = QuestieCompat.Merge(target[k], v)
-		elseif target[k] == nil then
+			target[k] = QuestieCompat.Merge(target[k], v, override)
+		elseif target[k] == nil or override then
 			target[k] = v
 		end
 	end
