@@ -450,6 +450,14 @@ function QuestieCompat.GetQuestIDFromLogIndex(questLogIndex)
     return select(9, GetQuestLogTitle(questLogIndex))
 end
 
+-- https://wowpedia.fandom.com/wiki/API_GetQuestLink
+-- Returns a QuestLink for a quest.
+-- Between patches 6.2 and 7.3.2 argument was changed to take a QuestID instead of a quest log index.
+function QuestieCompat.GetQuestLink(questId)
+    local questLogIndex = QuestieCompat.GetQuestLogIndexByID(questId)
+    return questLogIndex and GetQuestLink(questLogIndex)
+end
+
 -- https://wowpedia.fandom.com/wiki/API_GetQuestLogRewardMoney
 -- Returns the amount of money rewarded for a quest.
 function QuestieCompat.GetQuestLogRewardMoney(questID)

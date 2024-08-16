@@ -191,11 +191,7 @@ function _Qframe:OnClick(button)
                     QuestieMap:UnloadManualFrames(self.data.id)
                 end
             else
-                if Questie.db.profile.trackerShowQuestLevel then
-                    ChatEdit_InsertLink(QuestieLink:GetQuestLinkString(self.data.QuestData.level, self.data.QuestData.name, self.data.Id))
-                else
-                    ChatEdit_InsertLink("[" .. self.data.QuestData.name .. " (" .. self.data.Id .. ")]")
-                end
+                ChatEdit_InsertLink(QuestieLink:GetQuestLinkString(self.data.QuestData.level, self.data.QuestData.name, self.data.Id))
             end
         end
     end
