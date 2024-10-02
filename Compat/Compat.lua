@@ -12,6 +12,8 @@ local QuestieEventHandler = QuestieLoader:ImportModule("QuestieEventHandler")
 local QuestieQuest = QuestieLoader:ImportModule("QuestieQuest")
 ---@type QuestEventHandler
 local QuestEventHandler = QuestieLoader:ImportModule("QuestEventHandler")
+---@class AvailableQuests
+local AvailableQuests = QuestieLoader:ImportModule("AvailableQuests")
 ---@type ZoneDB
 local ZoneDB = QuestieLoader:ImportModule("ZoneDB")
 ---@type MinimapIcon
