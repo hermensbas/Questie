@@ -466,6 +466,12 @@ function QuestieCompat:GetQuestLinkString(questLevel, questName, questId)
 	return QuestieCompat.GetQuestLink(questId) or "[["..tostring(questLevel).."] "..questName.." ("..tostring(questId)..")]"
 end
 
+function QuestieCompat:GetQuestLinkStringById(questId)
+    local questName = QuestieDB.QueryQuestSingle(questId, "name");
+    local questLevel, _ = QuestieLib.GetTbcLevel(questId);
+    return QuestieCompat:GetQuestLinkString(questLevel, questName, questId)
+end
+
 -- https://wowpedia.fandom.com/wiki/API_GetQuestLogRewardMoney
 -- Returns the amount of money rewarded for a quest.
 function QuestieCompat.GetQuestLogRewardMoney(questID)
@@ -1712,6 +1718,7 @@ function QuestieCompat:ADDON_LOADED(event, addon)
     QuestieCompat.orig_GetSelectedSoundFile = Sounds.GetSelectedSoundFile
     Sounds.GetSelectedSoundFile = QuestieCompat.GetSelectedSoundFile
 	QuestieLink.GetQuestLinkString = rawget(QuestieLink, "GetQuestLinkString") or QuestieCompat.GetQuestLinkString
+	QuestieLink.GetQuestLinkStringById = rawget(QuestieLink, "GetQuestLinkStringById") or QuestieCompat.GetQuestLinkStringById
 
     hooksecurefunc(QuestieEventHandler, "RegisterLateEvents", QuestieCompat.QuestieEventHandler_RegisterLateEvents)
     hooksecurefunc(QuestEventHandler, "RegisterEvents", QuestieCompat.QuestEventHandler_RegisterEvents)
